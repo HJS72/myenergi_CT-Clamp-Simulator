@@ -1,0 +1,13 @@
+.platformio/
+.vscode/
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+*.elf
+*.hex
+build/
+dist/
+node_modules/
+.DS_Store

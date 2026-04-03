@@ -1,0 +1,12 @@
+net,from,to,notes
+GND,J1-7,J2-7,Common ground between both ESP32 modules and I/O
+5V_IN,J3-1,J1-VIN,5V input to Master module
+5V_IN,J3-1,J2-VIN,5V input to Slave module
+UART_TX_M2S,J1-GPIO17,J2-GPIO16,Master TX to Slave RX
+UART_RX_S2M,J2-GPIO17,J1-GPIO16,Slave TX to Master RX
+PHASE_A_DAC,J1-GPIO25,J4-1,Master DAC1 output to Harvi/Zappi Phase A
+PHASE_B_DAC,J2-GPIO25,J4-2,Slave DAC1 output to Harvi/Zappi Phase B
+PHASE_C_DAC,J2-GPIO26,J4-3,Slave DAC2 output to Harvi/Zappi Phase C
+GND_IO,J4-4,J1-7,Ground for Harvi/Zappi signal connector
+EN_MASTER_SW,SW1-1,J1-EN,Optional master reset/enable line
+EN_SLAVE_SW,SW2-1,J2-EN,Optional slave reset/enable line

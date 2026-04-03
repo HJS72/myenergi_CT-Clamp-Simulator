@@ -1,0 +1,18 @@
+component,x_mm,y_mm,rotation_deg,layer,notes
+J1(master socket),28,30,0,Top,Left half of board for Master module
+J2(slave socket),92,30,0,Top,Right half for Slave module
+J3(power in),10,10,90,Top,Edge access for cable entry
+J4(phase out),110,10,90,Top,Edge access to Harvi/Zappi wiring
+R1,45,12,0,Top,In series from J1 GPIO25 to PHASE_A
+R2,78,12,0,Top,In series from J2 GPIO25 to PHASE_B
+R3,86,12,0,Top,In series from J2 GPIO26 to PHASE_C
+C1,45,7,0,Top,Optional RC filter on PHASE_A
+C2,78,7,0,Top,Optional RC filter on PHASE_B
+C3,86,7,0,Top,Optional RC filter on PHASE_C
+C4,18,12,0,Top,Bulk capacitance close to J3 power input
+D1,15,16,180,Top,Optional reverse protection near power input
+F1,21,16,0,Top,Optional polyfuse after power input
+H1,5,5,0,Top,Mounting hole corner
+H2,115,5,0,Top,Mounting hole corner
+H3,5,55,0,Top,Mounting hole corner
+H4,115,55,0,Top,Mounting hole corner

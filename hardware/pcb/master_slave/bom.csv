@@ -1,0 +1,18 @@
+refdes,qty,value,footprint,description
+J1,1,ESP32-DEVKIT-V1 Header Pair,PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Master ESP32 module socket
+J2,1,ESP32-DEVKIT-V1 Header Pair,PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Slave ESP32 module socket
+J3,1,Screw Terminal 2-pin,TerminalBlock_2_P5.08mm,5V/GND power input
+J4,1,Screw Terminal 4-pin,TerminalBlock_4_P5.08mm,Phase A/B/C + GND output to Harvi/Zappi
+R1,1,10k,R_0805,Series resistor for PHASE_A_DAC
+R2,1,10k,R_0805,Series resistor for PHASE_B_DAC
+R3,1,10k,R_0805,Series resistor for PHASE_C_DAC
+C1,1,100nF,C_0805,Optional filter capacitor PHASE_A_DAC to GND
+C2,1,100nF,C_0805,Optional filter capacitor PHASE_B_DAC to GND
+C3,1,100nF,C_0805,Optional filter capacitor PHASE_C_DAC to GND
+C4,1,470uF,CP_Radial_D8.0mm_P3.5mm,Input bulk capacitor on 5V rail
+C5,2,100nF,C_0805,Decoupling near each ESP32 socket (5V to GND)
+D1,1,SS14,D_SMA,Reverse polarity protection (optional)
+F1,1,1A Polyfuse,Polyfuse_1206,Input protection on 5V rail (optional)
+SW1,1,Tactile Switch,SW_PUSH_6mm,Master reset (optional)
+SW2,1,Tactile Switch,SW_PUSH_6mm,Slave reset (optional)
+H1,4,M3 mounting hole,MountingHole_3.2mm_M3,Mechanical mounting

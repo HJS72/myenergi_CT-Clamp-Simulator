@@ -1,0 +1,19 @@
+refdes,qty,value,footprint,description
+J1,1,Terminal 3-pin 230VAC+PE,TerminalBlock_3_P7.62mm,AC mains input (L/N/PE)
+F1,1,250V T250mA Fuse,Fuseholder_5x20mm_PCB,Primary fuse in line path
+NTC1,1,10D-9,Disc_D9.0mm,Inrush current limiter for AC/DC module
+MOV1,1,275VAC MOV 14D471K,Disc_D14.0mm,Surge suppression across L/N
+PS1,1,HLK-PM01 or IRM-05-5,ACDC_Module_THT,Certified isolated 230VAC to 5V module
+F2,1,1A Polyfuse,Polyfuse_1206,Secondary 5V rail protection
+J2,1,Terminal 2-pin 5V/GND,TerminalBlock_2_P5.08mm,Low voltage service output/test
+J3,1,ESP32-DEVKIT-V1 Header Pair,PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Master ESP32 module socket
+J4,1,ESP32-DEVKIT-V1 Header Pair,PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Slave ESP32 module socket
+J5,1,Terminal 4-pin A/B/C/GND,TerminalBlock_4_P5.08mm,Signal output to Harvi/Zappi
+R1,1,10k,R_0805,Series resistor for phase A output
+R2,1,10k,R_0805,Series resistor for phase B output
+R3,1,10k,R_0805,Series resistor for phase C output
+C1,1,100nF,C_0805,Optional phase A output filter to GND
+C2,1,100nF,C_0805,Optional phase B output filter to GND
+C3,1,100nF,C_0805,Optional phase C output filter to GND
+C4,1,470uF/10V,CP_Radial_D8.0mm_P3.5mm,Bulk capacitor on 5V secondary
+H1,4,M3 mounting hole,MountingHole_3.2mm_M3,Mechanical mounting
