@@ -72,6 +72,12 @@
 - MQTT Robustheit testen
 - Langzeit-Stabilität
 - Troubleshooting Matrix
+
+**→ [WOKWI.md](WOKWI.md)** - Browser simulation setup
+- ESP32 + OLED I2C wiring in Wokwi
+- MQTT topic simulation over public broker
+- Fast bring-up without hardware
+
 ### ❓ I Have Questions
 
 **→ [FAQ.md](FAQ.md)** - Frequently asked questions
@@ -125,6 +131,7 @@
 | [MQTT.md](MQTT.md) | MQTT configuration guide | 10 min |
 | [MASTER_SLAVE.md](MASTER_SLAVE.md) | Master-Slave deep dive | 20 min |
 | [TESTING.md](TESTING.md) | Test-Anleitung (8 Szenarien) | 90 min |
+| [WOKWI.md](WOKWI.md) | Wokwi simulation setup | 10 min |
 | [SHOPPING_LIST.md](SHOPPING_LIST.md) | Einkaufsliste mit Links | 5 min |
 | [FAQ.md](FAQ.md) | Q&A and troubleshooting | 10 min |
 | [README.md](README.md) | Full documentation | 20 min |

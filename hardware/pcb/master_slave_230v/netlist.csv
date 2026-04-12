@@ -16,9 +16,11 @@ GND_ISO,J2-2,J4-GND,Ground to Slave socket
 UART_TX_M2S,J3-GPIO17,J4-GPIO16,Master TX to Slave RX
 UART_RX_S2M,J4-GPIO17,J3-GPIO16,Slave TX to Master RX
 PHASE_A_DAC,J3-GPIO25,R1-1,Master phase A via series resistor
-PHASE_A_OUT,R1-2,J5-1,Phase A output terminal
+PHASE_A_OUT,R1-2,J5A-1,Phase A output terminal
 PHASE_B_DAC,J4-GPIO25,R2-1,Slave phase B via series resistor
-PHASE_B_OUT,R2-2,J5-2,Phase B output terminal
+PHASE_B_OUT,R2-2,J5B-1,Phase B output terminal
 PHASE_C_DAC,J4-GPIO26,R3-1,Slave phase C via series resistor
-PHASE_C_OUT,R3-2,J5-3,Phase C output terminal
-GND_OUT,J5-4,J2-2,Signal ground output terminal
+PHASE_C_OUT,R3-2,J5C-1,Phase C output terminal
+GND_OUT,J5A-2,J2-2,Signal ground output terminal (Phase A block)
+GND_OUT,J5B-2,J2-2,Signal ground output terminal (Phase B block)
+GND_OUT,J5C-2,J2-2,Signal ground output terminal (Phase C block)

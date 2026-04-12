@@ -7,6 +7,7 @@ void MQTTHandler::begin(const char* clientId) {
 }
 
 bool MQTTHandler::connect(const char* server, uint16_t port, const char* user, const char* pass) {
+    client.setServer(server, port);
     if (user && pass) {
         return client.connect("myenergi_CT-Clamp-Simulator", user, pass);
     } else {
@@ -53,12 +54,16 @@ float MQTTHandler::getCurrentPhaseC() {
     return currentC;
 }
 
+void MQTTHandler::setCurrentPhaseA(float value) {
+    currentA = constrain(value, -(float)CURRENT_MAX, (float)CURRENT_MAX);
+}
+
 void MQTTHandler::setCurrentPhaseB(float value) {
-    currentB = constrain(value, 0.0, 100.0);
+    currentB = constrain(value, -(float)CURRENT_MAX, (float)CURRENT_MAX);
 }
 
 void MQTTHandler::setCurrentPhaseC(float value) {
-    currentC = constrain(value, 0.0, 100.0);
+    currentC = constrain(value, -(float)CURRENT_MAX, (float)CURRENT_MAX);
 }
 
 void MQTTHandler::setCallback(void (*callback)(char*, uint8_t*, unsigned int)) {

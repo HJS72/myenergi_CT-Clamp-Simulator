@@ -1,12 +1,29 @@
 net,from,to,notes
-GND,J1-7,J2-7,Common ground between both ESP32 modules and I/O
-5V_IN,J3-1,J1-VIN,5V input to Master module
-5V_IN,J3-1,J2-VIN,5V input to Slave module
-UART_TX_M2S,J1-GPIO17,J2-GPIO16,Master TX to Slave RX
-UART_RX_S2M,J2-GPIO17,J1-GPIO16,Slave TX to Master RX
-PHASE_A_DAC,J1-GPIO25,J4-1,Master DAC1 output to Harvi/Zappi Phase A
-PHASE_B_DAC,J2-GPIO25,J4-2,Slave DAC1 output to Harvi/Zappi Phase B
-PHASE_C_DAC,J2-GPIO26,J4-3,Slave DAC2 output to Harvi/Zappi Phase C
-GND_IO,J4-4,J1-7,Ground for Harvi/Zappi signal connector
-EN_MASTER_SW,SW1-1,J1-EN,Optional master reset/enable line
-EN_SLAVE_SW,SW2-1,J2-EN,Optional slave reset/enable line
+USB_5V,J3-VBUS,F1-1,USB-C VBUS into input protection
+USB_GND,J3-GND,J1B-1_GND,USB-C ground to common ground (Master)
+USB_GND,J3-GND,J2B-1_GND,USB-C ground to common ground (Slave)
+USB_CC1,J3-CC1,RCC1-1,USB-C sink identification on CC1
+USB_CC2,J3-CC2,RCC2-1,USB-C sink identification on CC2
+USB_GND,RCC1-2,J1B-1_GND,CC1 pull-down to ground
+USB_GND,RCC2-2,J1B-1_GND,CC2 pull-down to ground
+GND,J1B-1_GND,J2B-1_GND,Common ground between both ESP32 modules and I/O
+5V_IN,F1-2,J1A-19_5V,Protected 5V input to Master module
+5V_IN,F1-2,J2A-19_5V,Protected 5V input to Slave module
+UART_TX_M2S,J1B-11_IO17,J2B-12_IO16,Master TX to Slave RX
+UART_RX_S2M,J2B-11_IO17,J1B-12_IO16,Slave TX to Master RX
+OLED_VCC,J1A-1_3V3,J6-1,OLED power output 3V3
+OLED_GND,J1B-1_GND,J6-2,OLED ground
+I2C_SCL,J1B-3_IO22,J6-3,OLED I2C clock
+I2C_SDA,J1B-6_IO21,J6-4,OLED I2C data
+I2C_SCL,R4-1,J6-3,Optional pull-up resistor node SCL
+I2C_SDA,R5-1,J6-4,Optional pull-up resistor node SDA
+OLED_VCC,R4-2,J6-1,Optional pull-up to 3V3 for SCL
+OLED_VCC,R5-2,J6-1,Optional pull-up to 3V3 for SDA
+PHASE_A_DAC,J1A-9_IO25,J4A-1,Master DAC1 output to Harvi/Zappi Phase A
+PHASE_B_DAC,J2A-9_IO25,J4B-1,Slave DAC1 output to Harvi/Zappi Phase B
+PHASE_C_DAC,J2A-10_IO26,J4C-1,Slave DAC2 output to Harvi/Zappi Phase C
+GND_IO,J4A-2,J1B-1_GND,Ground for Harvi/Zappi Phase A connector
+GND_IO,J4B-2,J1B-1_GND,Ground for Harvi/Zappi Phase B connector
+GND_IO,J4C-2,J1B-1_GND,Ground for Harvi/Zappi Phase C connector
+EN_MASTER_SW,SW1-1,J1A-2_EN,Optional master reset/enable line
+EN_SLAVE_SW,SW2-1,J2A-2_EN,Optional slave reset/enable line

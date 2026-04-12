@@ -20,13 +20,30 @@
 2. Keep DAC traces away from power entry and switching noise
 3. Star-ground at power input, then wide ground pour
 4. Place C1/C2/C3 close to signal terminal side
-5. Place C4 close to J3 input terminal
+5. Place C4 close to J3 USB-C input and F1
 
-## Connector pinout to Harvi/Zappi (J4)
-- Pin 1: Phase A DAC (from Master GPIO25 through R1)
-- Pin 2: Phase B DAC (from Slave GPIO25 through R2)
-- Pin 3: Phase C DAC (from Slave GPIO26 through R3)
-- Pin 4: GND
+## USB-C power input (J3)
+- Power-only USB-C sink implementation
+- CC1 and CC2 each require 5.1k pull-down to GND (RCC1/RCC2)
+- Route VBUS through F1 polyfuse before 5V distribution to both ESP32 modules
+- Keep USB-C input return path short and wide
+
+## Connector pinout to Harvi/Zappi (J4A/J4B/J4C)
+- J4A Pin 1: Phase A DAC (from Master GPIO25 through R1)
+- J4A Pin 2: GND
+- J4B Pin 1: Phase B DAC (from Slave GPIO25 through R2)
+- J4B Pin 2: GND
+- J4C Pin 1: Phase C DAC (from Slave GPIO26 through R3)
+- J4C Pin 2: GND
+
+## OLED connector pinout (J6)
+- J6 Pin 1: 3V3
+- J6 Pin 2: GND
+- J6 Pin 3: SCL (GPIO22)
+- J6 Pin 4: SDA (GPIO21)
+
+Notes:
+- Optional pull-up resistors R4/R5 (4.7k) can be populated if display module has weak/no pull-ups.
 
 ## UART interconnect (on-board)
 - Master GPIO17 -> Slave GPIO16

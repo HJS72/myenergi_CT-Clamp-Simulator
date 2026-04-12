@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "author": "GitHub Copilot",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "master",
+      "top": 0,
+      "left": -290,
+      "attrs": {
+        "firmware": ".pio/build/esp32-master/firmware.bin",
+        "elf": ".pio/build/esp32-master/firmware.elf"
+      }
+    },
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "slave",
+      "top": 0,
+      "left": 230,
+      "attrs": {
+        "firmware": ".pio/build/esp32-slave/firmware.bin",
+        "elf": ".pio/build/esp32-slave/firmware.elf"
+      }
+    },
+    {
+      "type": "board-ssd1306",
+      "id": "oled1",
+      "top": -160,
+      "left": -530,
+      "attrs": { "i2cAddress": "0x3c" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rA",
+      "top": 415,
+      "left": -304,
+      "rotate": 90,
+      "attrs": { "resistance": "330" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledA",
+      "top": 470,
+      "left": -318,
+      "attrs": { "color": "red", "label": "A" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rB",
+      "top": 415,
+      "left": 216,
+      "rotate": 90,
+      "attrs": { "resistance": "330" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledB",
+      "top": 470,
+      "left": 202,
+      "attrs": { "color": "yellow", "label": "B" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rC",
+      "top": 415,
+      "left": 276,
+      "rotate": 90,
+      "attrs": { "resistance": "330" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledC",
+      "top": 470,
+      "left": 262,
+      "attrs": { "color": "blue", "label": "C" }
+    }
+  ],
+  "connections": [
+    [ "master:3V3",   "oled1:VCC",  "red",    [] ],
+    [ "master:GND.1", "oled1:GND",  "black",  [] ],
+    [ "master:D22",   "oled1:SCL",  "green",  [] ],
+    [ "master:D21",   "oled1:SDA",  "blue",   [] ],
+
+    [ "master:D17",   "slave:D16",  "orange", [] ],
+    [ "master:D16",   "slave:D17",  "purple", [] ],
+    [ "master:GND.2", "slave:GND.1","black",  [] ],
+
+    [ "slave:D27",    "slave:GND.1", "gray", [] ],
+
+    [ "master:D25",   "rA:1",       "red",    [] ],
+    [ "rA:2",         "ledA:A",     "red",    [] ],
+    [ "ledA:C",       "master:GND.1","black", [] ],
+
+    [ "slave:D25",    "rB:1",       "yellow", [] ],
+    [ "rB:2",         "ledB:A",     "yellow", [] ],
+    [ "ledB:C",       "slave:GND.2","black",  [] ],
+
+    [ "slave:D26",    "rC:1",       "blue",   [] ],
+    [ "rC:2",         "ledC:A",     "blue",   [] ],
+    [ "ledC:C",       "slave:GND.2","black",  [] ]
+  ],
+  "dependencies": {}
+}

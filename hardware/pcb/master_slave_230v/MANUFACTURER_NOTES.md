@@ -27,7 +27,7 @@
 - fab_notes.md
 
 ## Do Not Change Without Approval
-- Connector pin order labels on silkscreen (J1/J2/J5/J8/J9)
+- Connector pin order labels on silkscreen (J1/J2/J5A/J5B/J5C/J8/J9)
 - HV/LV isolation area and keepout limits
 - Net names and trace intent for L/N and 5V isolation path
 
@@ -45,7 +45,7 @@
 - Board outline and hole positions correct
 - No mask/silk overlap on pads
 - Isolation region intact and free of copper bridges
-- Silkscreen labels readable at J1/J2/J5/J8/J9
+- Silkscreen labels readable at J1/J2/J5A/J5B/J5C/J8/J9
 
 ## First Power Test (No ESP32 installed)
 - Apply controlled 230VAC via protected bench setup

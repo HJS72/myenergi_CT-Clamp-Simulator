@@ -26,6 +26,7 @@ public:
     float getCurrentPhaseC();
     
     // Data setters (for Master-Slave mode)
+    void setCurrentPhaseA(float value);
     void setCurrentPhaseB(float value);
     void setCurrentPhaseC(float value);
     
@@ -39,10 +40,10 @@ private:
     PubSubClient client;
     unsigned long lastReconnectAttempt = 0;
     
-    // Current values (RMS)
-    float currentA = 0.0;
-    float currentB = 0.0;
-    float currentC = 0.0;
+    // Current values (RMS) — CURRENT_DEFAULT means no MQTT value received yet
+    float currentA = CURRENT_DEFAULT;
+    float currentB = CURRENT_DEFAULT;
+    float currentC = CURRENT_DEFAULT;
     
     friend void mqttMessageCallback(char* topic, uint8_t* payload, unsigned int length);
 };

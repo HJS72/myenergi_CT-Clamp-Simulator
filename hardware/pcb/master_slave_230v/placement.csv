@@ -8,7 +8,9 @@ F2(secondary polyfuse),72,16,0,Top,Protect 5V rail leaving module
 J2(5V service),84,8,90,Top,Low-voltage service connector
 J3(master socket),28,46,0,Top,Low-voltage area left
 J4(slave socket),92,46,0,Top,Low-voltage area right
-J5(phase out),118,12,90,Top,Output terminal A/B/C/GND
+J5A(phase A out),112,12,90,Top,Output terminal Phase A/GND
+J5B(phase B out),118,12,90,Top,Output terminal Phase B/GND
+J5C(phase C out),124,12,90,Top,Output terminal Phase C/GND
 R1,50,12,0,Top,Series on phase A line
 R2,86,12,0,Top,Series on phase B line
 R3,94,12,0,Top,Series on phase C line

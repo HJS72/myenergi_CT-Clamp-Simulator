@@ -26,7 +26,9 @@ This folder contains a second PCB variant with mains input and isolated 5V gener
 - Master GPIO25 -> Phase A
 - Slave GPIO25 -> Phase B
 - Slave GPIO26 -> Phase C
-- J5 output terminal: A / B / C / GND
+- J5A output terminal: Phase A / GND
+- J5B output terminal: Phase B / GND
+- J5C output terminal: Phase C / GND
 
 ## Important
 This is a high-voltage design concept and requires qualified design verification before real deployment.
@@ -48,7 +50,9 @@ This is a high-voltage design concept and requires qualified design verification
 - Additional silkscreen legends added for connectors:
 	- J1: AC input pin order L/N/PE
 	- J2: 5V service connector +5V/GND
-	- J5: Harvi/Zappi output pin order A/B/C/GND
+	- J5A: Harvi/Zappi output pin order A/GND
+	- J5B: Harvi/Zappi output pin order B/GND
+	- J5C: Harvi/Zappi output pin order C/GND
 	- Protection parts labels (F1, MOV1, NTC1, PS1, F2)
 
 ## Fixed bridge mapping (ESP32 DevKit V1 30-pin)

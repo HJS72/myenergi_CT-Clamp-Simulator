@@ -1,0 +1,19 @@
+[wokwi]
+version = 1
+firmware = ".pio/build/esp32-master/firmware.bin"
+elf = ".pio/build/esp32-master/firmware.elf"
+# vcdFile disabled: no logic analyzer in diagram
+
+# NOTE: This file is the legacy alternate config.
+# The active config is wokwi.toml (used by default by the Wokwi VS Code extension).
+# Per-chip firmware is defined in diagram.json attrs, not here.
+#
+# BUILD:
+# 1. pio run -e esp32-master
+# 2. pio run -e esp32-slave
+#
+# DIAGRAM: diagram.json (2x ESP32 + OLED + UART + DAC LEDs + Logic Analyzer)
+# START:   Ctrl+Shift+P -> "Wokwi: Start Simulator"
+#
+# OLED shows 3-phase currents (--- if no MQTT value received)
+# MQTT broker: broker.hivemq.com (Wokwi-GUEST WiFi)

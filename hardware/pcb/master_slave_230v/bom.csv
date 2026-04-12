@@ -8,7 +8,9 @@ F2,1,1A Polyfuse,Polyfuse_1206,Secondary 5V rail protection
 J2,1,Terminal 2-pin 5V/GND,TerminalBlock_2_P5.08mm,Low voltage service output/test
 J3,1,ESP32-DEVKIT-V1 Header Pair,PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Master ESP32 module socket
 J4,1,ESP32-DEVKIT-V1 Header Pair,PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Slave ESP32 module socket
-J5,1,Terminal 4-pin A/B/C/GND,TerminalBlock_4_P5.08mm,Signal output to Harvi/Zappi
+J5A,1,Terminal 2-pin Phase A/GND,TerminalBlock_2_P5.08mm,Phase A + GND output to Harvi/Zappi
+J5B,1,Terminal 2-pin Phase B/GND,TerminalBlock_2_P5.08mm,Phase B + GND output to Harvi/Zappi
+J5C,1,Terminal 2-pin Phase C/GND,TerminalBlock_2_P5.08mm,Phase C + GND output to Harvi/Zappi
 R1,1,10k,R_0805,Series resistor for phase A output
 R2,1,10k,R_0805,Series resistor for phase B output
 R3,1,10k,R_0805,Series resistor for phase C output

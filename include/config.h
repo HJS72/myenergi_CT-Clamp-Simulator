@@ -4,12 +4,23 @@
 #include <Arduino.h>
 
 // ============= WiFi Configuration =============
+#ifdef WOKWI_SIM
+#define WIFI_SSID "Wokwi-GUEST"
+#define WIFI_PASSWORD ""
+#else
 #define WIFI_SSID "your-ssid"
 #define WIFI_PASSWORD "your-password"
+#endif
+#define WIFI_AP_SSID "myenergi-CT-Sim"
+#define WIFI_AP_PASSWORD ""
 #define WIFI_TIMEOUT 10000  // milliseconds
 
 // ============= MQTT Configuration =============
+#ifdef WOKWI_SIM
+#define MQTT_SERVER "broker.hivemq.com"
+#else
 #define MQTT_SERVER "192.168.1.100"
+#endif
 #define MQTT_PORT 1883
 #define MQTT_RECONNECT_INTERVAL 5000  // milliseconds
 #define MQTT_TIMEOUT 5000
@@ -35,8 +46,9 @@
 #define UPDATE_INTERVAL 20   // milliseconds (50Hz = 20ms per cycle)
 
 // Current range
-#define CURRENT_MAX 100      // Maximum expected current (Amperes)
-#define DAC_MAX_VALUE 255    // 8-bit DAC resolution
+#define CURRENT_MAX 100          // Maximum expected current (Amperes)
+#define DAC_MAX_VALUE 255        // 8-bit DAC resolution
+#define CURRENT_DEFAULT -99.0f   // Sentinel: no MQTT value received yet (-99A = no data/no connection)
 
 // Phase shift (120 degrees for 3-phase)
 #define PHASE_A_OFFSET 0     // 0 degrees
@@ -53,5 +65,19 @@
 #define BURDEN_RESISTOR 16   // Ohms (typical for YHDC SCT-013)
 #define CT_TURNS_RATIO 1000  // 1000:1 for SCT-013-000
 #define AMP_TO_DAC_RATIO (DAC_MAX_VALUE / CURRENT_MAX)
+
+// ============= OLED Display (I2C SSD1306) =============
+#define OLED_ENABLED true
+#define OLED_WIDTH 128
+#define OLED_HEIGHT 64
+#define OLED_I2C_ADDRESS 0x3C
+#define OLED_SDA_PIN 21
+#define OLED_SCL_PIN 22
+#define OLED_UPDATE_INTERVAL 500  // milliseconds
+
+// ============= Sum Graph History =============
+// Ring buffer: 128 samples over 5 minutes, resampled to the graph width on display
+#define GRAPH_SAMPLES     128
+#define GRAPH_INTERVAL_MS 2344
 
 #endif // CONFIG_H

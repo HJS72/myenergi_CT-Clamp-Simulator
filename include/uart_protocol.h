@@ -17,12 +17,12 @@
  * CRC16:     16-bit checksum
  * END:       0xAA (end marker)
  * 
- * Total: 8 bytes
+ * Total: 7 bytes
  */
 
 #define UART_SYNC 0x55
 #define UART_END 0xAA
-#define UART_PACKET_SIZE 8
+#define UART_PACKET_SIZE 7
 
 struct UARTPacket {
     uint8_t sync;        // 0x55

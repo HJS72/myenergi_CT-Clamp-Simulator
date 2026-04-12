@@ -1,8 +1,15 @@
 component,x_mm,y_mm,rotation_deg,layer,notes
 J1(master socket),28,30,0,Top,Left half of board for Master module
 J2(slave socket),92,30,0,Top,Right half for Slave module
-J3(power in),10,10,90,Top,Edge access for cable entry
-J4(phase out),110,10,90,Top,Edge access to Harvi/Zappi wiring
+J3(usb-c power in),10,10,90,Top,Edge access for shared USB-C power entry
+RCC1,18,18,0,Top,USB-C CC1 pull-down near connector
+RCC2,22,18,0,Top,USB-C CC2 pull-down near connector
+J4A(phase A out),104,10,90,Top,Edge access to Harvi/Zappi wiring (A/GND)
+J4B(phase B out),110,10,90,Top,Edge access to Harvi/Zappi wiring (B/GND)
+J4C(phase C out),116,10,90,Top,Edge access to Harvi/Zappi wiring (C/GND)
+J6(oled i2c),10,45,90,Top,OLED 1.3in I2C header (3V3/GND/SCL/SDA)
+R4,16,44,0,Top,Optional SCL pull-up resistor near OLED header
+R5,16,47,0,Top,Optional SDA pull-up resistor near OLED header
 R1,45,12,0,Top,In series from J1 GPIO25 to PHASE_A
 R2,78,12,0,Top,In series from J2 GPIO25 to PHASE_B
 R3,86,12,0,Top,In series from J2 GPIO26 to PHASE_C

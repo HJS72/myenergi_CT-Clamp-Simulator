@@ -1,8 +1,15 @@
 refdes,qty,value,footprint,description
-J1,1,ESP32-DEVKIT-V1 Header Pair,PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Master ESP32 module socket
-J2,1,ESP32-DEVKIT-V1 Header Pair,PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Slave ESP32 module socket
-J3,1,Screw Terminal 2-pin,TerminalBlock_2_P5.08mm,5V/GND power input
-J4,1,Screw Terminal 4-pin,TerminalBlock_4_P5.08mm,Phase A/B/C + GND output to Harvi/Zappi
+J1A/J1B,1,ESP32-DevKitC-V4 NodeMCU Header Pair (38-pin),PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Master ESP32 module socket
+J2A/J2B,1,ESP32-DevKitC-V4 NodeMCU Header Pair (38-pin),PinSocket_1x19_P2.54mm + PinSocket_1x19_P2.54mm,Slave ESP32 module socket
+J3,1,USB-C Receptacle,USB_C_Receptacle_HRO_TYPE-C-31-M-12,Shared 5V power input for both ESP32 modules
+RCC1,1,5.1k,R_0805,USB-C CC1 pull-down (Rd)
+RCC2,1,5.1k,R_0805,USB-C CC2 pull-down (Rd)
+J4A,1,Screw Terminal 2-pin,TerminalBlock_2_P5.08mm,Phase A + GND output to Harvi/Zappi
+J4B,1,Screw Terminal 2-pin,TerminalBlock_2_P5.08mm,Phase B + GND output to Harvi/Zappi
+J4C,1,Screw Terminal 2-pin,TerminalBlock_2_P5.08mm,Phase C + GND output to Harvi/Zappi
+J6,1,Pin Header 1x4 2.54mm,PinHeader_1x04_P2.54mm_Vertical,OLED I2C header (3V3/GND/SCL/SDA)
+R4,1,4.7k,R_0805,Optional I2C pull-up on SCL to 3V3
+R5,1,4.7k,R_0805,Optional I2C pull-up on SDA to 3V3
 R1,1,10k,R_0805,Series resistor for PHASE_A_DAC
 R2,1,10k,R_0805,Series resistor for PHASE_B_DAC
 R3,1,10k,R_0805,Series resistor for PHASE_C_DAC
