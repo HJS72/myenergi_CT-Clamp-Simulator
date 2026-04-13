@@ -64,3 +64,56 @@ This folder contains a practical PCB starter package for the Master-Slave varian
 - No mains wiring on PCB
 - Low-voltage signals only
 - USB-C is used as power sink only (USB2.0 data lines not used)
+
+## ASCII Wiring Schema (Production)
+
+```text
+Power entry and distribution
+----------------------------
+ USB-C J3
+	VBUS ----> F1 (polyfuse) ----> 5V_IN ----> J1A-19 (Master 5V)
+														+-> J2A-19 (Slave 5V)
+
+	GND  ----------------------------------> J1B-1 (Master GND)
+		+-----------------------------------> J2B-1 (Slave GND)
+
+	CC1 ----> RCC1 5.1k ----> GND
+	CC2 ----> RCC2 5.1k ----> GND
+
+
+Master/Slave interconnect
+-------------------------
+ UART_TX_M2S:  J1B-11 (Master IO17 TX) ----> J2B-12 (Slave IO16 RX)
+ UART_RX_S2M:  J2B-11 (Slave  IO17 TX) ----> J1B-12 (Master IO16 RX)
+ Common GND:   J1B-1 -----------------------> J2B-1
+
+
+OLED header J6 (optional)
+-------------------------
+ J6-1 (VCC) <---- J1A-1  (Master 3V3)
+ J6-2 (GND) <---- J1B-1  (Master GND)
+ J6-3 (SCL) <---- J1B-3  (Master IO22)
+ J6-4 (SDA) <---- J1B-6  (Master IO21)
+
+ Optional pull-ups:
+	R4: J6-3 (SCL) -> J6-1 (3V3)
+	R5: J6-4 (SDA) -> J6-1 (3V3)
+
+
+Phase outputs to external terminal blocks
+-----------------------------------------
+ PHASE_A_DAC: J1A-9  (Master IO25) ----> J4A-1 (Phase A)
+ PHASE_B_DAC: J2A-9  (Slave  IO25) ----> J4B-1 (Phase B)
+ PHASE_C_DAC: J2A-10 (Slave  IO26) ----> J4C-1 (Phase C)
+
+ Ground returns:
+	J4A-2 -> GND
+	J4B-2 -> GND
+	J4C-2 -> GND
+
+
+Optional enable/reset switches
+------------------------------
+ SW1-1 ----> J1A-2 (Master EN)
+ SW2-1 ----> J2A-2 (Slave EN)
+```

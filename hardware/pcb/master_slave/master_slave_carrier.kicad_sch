@@ -1,0 +1,17 @@
+(kicad_sch
+  (version 20231120)
+  (generator "eeschema")
+  (generator_version "8.0")
+  (uuid "a5fe4e5d-9f25-4db6-9f2b-9f5f30c6c1b1")
+  (paper "A3")
+  (title_block
+    (title "Master-Slave Carrier")
+    (comment 1 "ESP32 DevKitC V4 x2")
+    (comment 2 "Generated starter schematic from project netlist")
+  )
+  (lib_symbols)
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+  (symbol_instances)
+)
