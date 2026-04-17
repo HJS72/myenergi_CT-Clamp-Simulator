@@ -1047,7 +1047,7 @@ static String buildDashboardHtml() {
     // Header card — WiFi / MQTT / Slave status pills
     String wifiPillClass = (WiFi.status() == WL_CONNECTED && !gAccessPointMode) ? "status-pill status-ok" : "status-pill status-bad";
     String wifiPillText  = gAccessPointMode ? "AP mode" : (WiFi.status() == WL_CONNECTED ? "connected" : "disconnected");
-    html += "<div class='card'><h1>CT Clamp Simulator</h1>";
+    html += "<div class='card'><h1>CT Clamp Simulator <small style='font-size:.52em;color:#64748b;font-weight:600'>v" + String(projectVersion) + "</small></h1>";
     html += "<div style='display:flex;gap:16px;flex-wrap:wrap;align-items:center'>";
     html += "<div>WiFi: <span class='" + wifiPillClass + "'>" + wifiPillText + "</span></div>";
     html += "<div>MQTT: <span id='mqtt-session-pill' class='" + mqttSessionClass + "'>" + mqttSessionText + "</span></div>";
