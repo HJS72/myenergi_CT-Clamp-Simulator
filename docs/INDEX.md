@@ -26,6 +26,7 @@
 
 **→ [HARDWARE.md](HARDWARE.md)** - Physical setup & wiring
 - Pin definitions
+- OLED SSD1306 (1.3 inch, I2C GPIO22/GPIO21)
 - CT sensor circuits
 - Signal verification
 - Oscilloscope measurements
@@ -69,6 +70,7 @@
 **→ [TESTING.md](TESTING.md)** - Umfassende Test-Anleitung
 - 8 verschiedene Test-Szenarien
 - Oszi-Messanweisungen
+- OLED Anzeige-Check (Wokwi/optional Hardware)
 - MQTT Robustheit testen
 - Langzeit-Stabilität
 - Troubleshooting Matrix
@@ -160,8 +162,8 @@ Master Board
   └─ GPIO17 (UART TX) ────► Slave
                             ↓
                        Slave Board
-                            ├─ GPIO25 (DAC) → Phase B
-                            └─ GPIO26 (DAC) → Phase C
+                            ├─ GPIO25 (DAC) → Phase C
+                            └─ GPIO26 (DAC) → Phase B
 ```
 **Use when:** Dedicated signal generation, low power slave, expandable
 

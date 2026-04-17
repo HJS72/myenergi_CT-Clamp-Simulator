@@ -26,8 +26,8 @@ Zweite PCB-Variante mit direktem 230VAC-Eingang und galvanisch isolierter 5V-Ver
 
 ## Elektrisches Mapping (LV)
 - Master GPIO25 -> Phase A
-- Slave GPIO25 -> Phase B
-- Slave GPIO26 -> Phase C
+- Slave GPIO25 -> Phase C
+- Slave GPIO26 -> Phase B
 - Master GPIO17 -> Slave GPIO16
 - Slave GPIO17 -> Master GPIO16
 
@@ -84,8 +84,8 @@ Master (J8 -> Master DevKit):
 - J8-4 (GND_ISO) -> GND
 
 Slave (J9 -> Slave DevKit):
-- J9-1 (PHASE_B_DAC) -> GPIO25
-- J9-2 (PHASE_C_DAC) -> GPIO26
+- J9-1 (PHASE_B_DAC) -> GPIO26
+- J9-2 (PHASE_C_DAC) -> GPIO25
 - J9-3 (UART_TX_M2S) -> GPIO16
 - J9-4 (UART_RX_S2M) -> GPIO17
 - J9-5 (GND_ISO) -> GND

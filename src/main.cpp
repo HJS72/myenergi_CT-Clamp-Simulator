@@ -3,16 +3,19 @@
 #include <PubSubClient.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <Adafruit_SH110X.h>
 #include "config.h"
 #include "mqtt_handler.h"
 #include "signal_generator.h"
+
+using OledDisplay = Adafruit_SH1106G;
+#define OLED_WHITE SH110X_WHITE
 
 // Global objects
 WiFiClient espClient;
 MQTTHandler* gMQTT = nullptr;
 ACSignalGenerator* gSignalGen = nullptr;
-Adafruit_SSD1306* gDisplay = nullptr;
+OledDisplay* gDisplay = nullptr;
 bool gDisplayReady = false;
 bool gAccessPointMode = false;
 
@@ -34,14 +37,14 @@ unsigned long lastDisplayUpdate = 0;
 static float graphHistory[GRAPH_SAMPLES];
 static uint8_t graphHead = 0;
 static unsigned long lastGraphSample = 0;
-static void drawSumGraph(Adafruit_SSD1306* disp);
+static void drawSumGraph(OledDisplay* disp);
 
 void setup() {
     Serial.begin(SERIAL_BAUD);
     delay(500);
     
     if (DEBUG_ENABLED) {
-        Serial.println("\n\n=== Myenergi Harvi CT Simulator ===");
+        Serial.println("\n\n=== CT Clamp Simulator ===");
         Serial.println("Initializing...");
     }
     
@@ -194,7 +197,7 @@ void setupMQTT() {
         return;
     }
 
-    gMQTT->begin("myenergi_CT-Clamp-Simulator-ESP32");
+    gMQTT->begin("ctsim-esp32");
     
     if (DEBUG_ENABLED) {
         Serial.print("Connecting to MQTT: ");
@@ -249,26 +252,31 @@ void setupDisplay() {
     if (!OLED_ENABLED) return;
 
     Wire.begin(OLED_SDA_PIN, OLED_SCL_PIN);
-    gDisplay = new Adafruit_SSD1306(OLED_WIDTH, OLED_HEIGHT, &Wire, -1);
+    gDisplay = new OledDisplay(OLED_WIDTH, OLED_HEIGHT, &Wire, -1);
 
-    if (!gDisplay->begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
+    if (!gDisplay->begin(OLED_I2C_ADDRESS, true)) {
         if (DEBUG_ENABLED) {
             Serial.println("✗ OLED init failed");
         }
         return;
     }
 
+    if (DEBUG_ENABLED) {
+        Serial.print("✓ OLED init address: 0x");
+        Serial.println(OLED_I2C_ADDRESS, HEX);
+    }
+
     gDisplayReady = true;
     gDisplay->clearDisplay();
-    gDisplay->setTextColor(SSD1306_WHITE);
+    gDisplay->setTextColor(OLED_WHITE);
     gDisplay->setTextSize(1);
     gDisplay->setCursor(0, 0);
-    gDisplay->println("Myenergi CT Sim");
+    gDisplay->println("CT Simulator");
     gDisplay->println("OLED online");
     gDisplay->display();
 }
 
-static void drawSumGraph(Adafruit_SSD1306* disp) {
+static void drawSumGraph(OledDisplay* disp) {
     const int GX0 = 58;
     const int GX1 = 127;
     const int GY0 = 0;
@@ -290,12 +298,12 @@ static void drawSumGraph(Adafruit_SSD1306* disp) {
     }
     if (maxAbs < 0.5f) maxAbs = 0.5f;
 
-    disp->drawFastVLine(axisX, GY0, GY1 - GY0 + 1, SSD1306_WHITE);
-    disp->drawFastHLine(axisX, axisY, GX1 - axisX + 1, SSD1306_WHITE);
+    disp->drawFastVLine(axisX, GY0, GY1 - GY0 + 1, OLED_WHITE);
+    disp->drawFastHLine(axisX, axisY, GX1 - axisX + 1, OLED_WHITE);
 
     for (int y = axisY - halfHeight; y <= axisY + halfHeight; y += halfHeight) {
-        disp->drawPixel(axisX - 1, y, SSD1306_WHITE);
-        disp->drawPixel(axisX + 1, y, SSD1306_WHITE);
+        disp->drawPixel(axisX - 1, y, OLED_WHITE);
+        disp->drawPixel(axisX + 1, y, OLED_WHITE);
     }
 
     if (!hasData) {
@@ -320,9 +328,9 @@ static void drawSumGraph(Adafruit_SSD1306* disp) {
         if (prevY >= 0) {
             int lo = min(y, prevY);
             int hi = max(y, prevY);
-            for (int py = lo; py <= hi; py++) disp->drawPixel(x, py, SSD1306_WHITE);
+            for (int py = lo; py <= hi; py++) disp->drawPixel(x, py, OLED_WHITE);
         }
-        disp->drawPixel(x, y, SSD1306_WHITE);
+        disp->drawPixel(x, y, OLED_WHITE);
         prevY = y;
     }
 }
@@ -360,7 +368,7 @@ void updateDisplay() {
     strcpy(vsl, "-");
 
     gDisplay->clearDisplay();
-    gDisplay->setTextColor(SSD1306_WHITE);
+    gDisplay->setTextColor(OLED_WHITE);
     gDisplay->setTextSize(1);
 
     gDisplay->setCursor(0, 0);

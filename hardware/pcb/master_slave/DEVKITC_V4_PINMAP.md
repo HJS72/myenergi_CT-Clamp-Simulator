@@ -43,9 +43,11 @@ Important:
 | Ground reference | J1B-1_GND | J2B-1_GND |
 | UART TX -> RX | J1B-11_IO17 | J2B-12_IO16 |
 | UART RX <- TX | J1B-12_IO16 | J2B-11_IO17 |
+| Slave EN control (OTA) | J1A-7_IO32 | J2A-2_EN |
+| Slave BOOT control (OTA) | J1A-8_IO33 | J2B-14_IO0 |
 | Phase A DAC | J1A-9_IO25 | - |
-| Phase B DAC | - | J2A-9_IO25 |
-| Phase C DAC | - | J2A-10_IO26 |
+| Phase B DAC | - | J2A-10_IO26 |
+| Phase C DAC | - | J2A-9_IO25 |
 | EN switch | J1A-2_EN | J2A-2_EN |
 
 ## OLED I2C connector mapping (J6)

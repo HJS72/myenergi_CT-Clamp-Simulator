@@ -35,8 +35,8 @@ Master ESP32                Slave ESP32
 │ GPIO16 (RX) ◄────────────── GPIO17 (TX)    │
 │ GND ─────────────────────── GND             │
 │                          │                  │
-│ + GPIO25 (Phase A)       │ + GPIO25 (Phase B)
-│ + WiFi/MQTT              │ + GPIO26 (Phase C)
+│ + GPIO25 (Phase A)       │ + GPIO25 (Phase C)
+│ + WiFi/MQTT              │ + GPIO26 (Phase B)
 │                          │ + Low Power Mode  │
 └──────────────────┘      └──────────────────┘
 ```
@@ -54,12 +54,22 @@ GND            → Common ground with Slave
 
 **Slave ESP32:**
 ```
-GPIO25 (DAC1)  → Phase B output (to Harvi)
-GPIO26 (DAC2)  → Phase C output (to Harvi)
+GPIO25 (DAC1)  → Phase C output (to Harvi)
+GPIO26 (DAC2)  → Phase B output (to Harvi)
 GPIO16 (RX)    → Master GPIO17 (TX)
 GPIO17 (TX)    → Master GPIO16 (RX)
 GND            → Common ground with Master
 ```
+
+**Serial pass-through OTA control lines (required for slave flashing via master web UI):**
+```
+Master GPIO32  → Slave EN
+Master GPIO33  → Slave GPIO0 (BOOT)
+```
+
+Recommended hardware implementation:
+- Keep 10k pull-up resistors on Slave EN and Slave GPIO0 to 3V3.
+- Use open-drain transistor stages from master control GPIOs to avoid line contention.
 
 ### Cable Specification
 
@@ -139,8 +149,8 @@ Slave ←UART← Master
   ↓
   Receives and validates packet
   ↓
-  Generates Phase B (23A) on GPIO25
-  Generates Phase C (24.8A) on GPIO26
+  Generates Phase B (23A) on GPIO26
+  Generates Phase C (24.8A) on GPIO25
 ```
 
 ---

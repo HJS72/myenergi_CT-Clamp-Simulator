@@ -39,10 +39,63 @@ This folder contains a practical PCB starter package for the Master-Slave varian
 
 ## Expected firmware pin mapping
 - Master GPIO25 -> Phase A
-- Slave GPIO25 -> Phase B
-- Slave GPIO26 -> Phase C
+- Slave GPIO25 -> Phase C
+- Slave GPIO26 -> Phase B
 - Master GPIO17 -> Slave GPIO16
 - Slave GPIO17 -> Master GPIO16
+- Master GPIO32 -> Slave EN (serial pass-through OTA control)
+- Master GPIO33 -> Slave GPIO0 (serial pass-through OTA boot control)
+
+## Serial Pass-Through OTA Wiring
+
+Required additional control wires for flashing the slave through the master web UI:
+
+- `Master GPIO32` -> `Slave EN`
+- `Master GPIO33` -> `Slave GPIO0`
+
+Recommended implementation:
+
+- Drive both control lines through NPN transistor stages or open-drain MOSFETs.
+- Keep Slave EN pulled up (10k to 3V3).
+- Keep Slave GPIO0 pulled up (10k to 3V3).
+- Ensure Master and Slave share a low-impedance common ground.
+
+The firmware uses these lines to reset the slave and force boot mode before UART image transfer.
+
+## DAC Output Wiring (Production)
+
+Use the following direct mapping from ESP32 DAC pins to output terminal blocks:
+
+- Phase A (Master DAC)
+	- Source: `J1A-9_IO25` (Master GPIO25 / DAC1)
+	- Net: `PHASE_A_DAC`
+	- Destination: `J4A-1` (Phase A output)
+	- Return: `J4A-2` -> `GND`
+
+- Phase B (Slave DAC)
+	- Source: `J2A-10_IO26` (Slave GPIO26 / DAC2)
+	- Net: `PHASE_B_DAC`
+	- Destination: `J4B-1` (Phase B output)
+	- Return: `J4B-2` -> `GND`
+
+- Phase C (Slave DAC)
+	- Source: `J2A-9_IO25` (Slave GPIO25 / DAC1)
+	- Net: `PHASE_C_DAC`
+	- Destination: `J4C-1` (Phase C output)
+	- Return: `J4C-2` -> `GND`
+
+Optional analog smoothing/filter per phase:
+
+- Series resistor in output path:
+	- `R1` on Phase A
+	- `R2` on Phase B
+	- `R3` on Phase C
+- Shunt capacitor from phase net to GND:
+	- `C1` on Phase A
+	- `C2` on Phase B
+	- `C3` on Phase C
+
+This creates a simple RC low-pass per DAC channel and can reduce high-frequency DAC noise before the external interface stage.
 
 ## ESP32 Module Variant
 - Target module: ESP32 DevKitC V4 NodeMCU (38-pin)
@@ -85,6 +138,8 @@ Master/Slave interconnect
 -------------------------
  UART_TX_M2S:  J1B-11 (Master IO17 TX) ----> J2B-12 (Slave IO16 RX)
  UART_RX_S2M:  J2B-11 (Slave  IO17 TX) ----> J1B-12 (Master IO16 RX)
+ SLAVE_EN_CTL: J1A-7  (Master IO32)    ----> J2A-2  (Slave EN)
+ SLAVE_BOOT:   J1A-8  (Master IO33)    ----> J2B-14 (Slave IO0)
  Common GND:   J1B-1 -----------------------> J2B-1
 
 
@@ -103,8 +158,8 @@ OLED header J6 (optional)
 Phase outputs to external terminal blocks
 -----------------------------------------
  PHASE_A_DAC: J1A-9  (Master IO25) ----> J4A-1 (Phase A)
- PHASE_B_DAC: J2A-9  (Slave  IO25) ----> J4B-1 (Phase B)
- PHASE_C_DAC: J2A-10 (Slave  IO26) ----> J4C-1 (Phase C)
+ PHASE_B_DAC: J2A-10 (Slave  IO26) ----> J4B-1 (Phase B)
+ PHASE_C_DAC: J2A-9  (Slave  IO25) ----> J4C-1 (Phase C)
 
  Ground returns:
 	J4A-2 -> GND

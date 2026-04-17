@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CT Clamp Portal Preview</title>
+  <style>
+    body {
+      font-family: Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f8ff, #e6fff0);
+      margin: 0;
+      padding: 20px;
+      color: #1f2937;
+    }
+    .wrap { max-width: 980px; margin: auto; }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    h1 { margin: 0 0 10px 0; }
+    h2 { margin: 0 0 12px 0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .full { grid-column: 1 / -1; }
+    input, button {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background: #0f766e;
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-alt { background: #0f172a; }
+    .kpi { font-size: 18px; font-weight: 700; }
+    .mono { font-family: monospace; }
+    small { color: #64748b; }
+    .bar {
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 67%;
+      background: #16a34a;
+    }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      margin-right: 6px;
+    }
+    .mode-title {
+      margin: 20px 0 8px 0;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #334155;
+    }
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="mode-title">Preview 1: Captive Portal (AP mode, first setup)</div>
+    <div class="card">
+      <h1>CT Clamp Simulator</h1>
+      <div>Status: <span class="kpi">AP (Provisioning)</span> | MQTT: <span class="kpi">Disconnected</span></div>
+      <div>IP: 192.168.4.1</div>
+      <div>Uptime: 18s</div>
+      <div style="margin-top:8px">
+        <span class="badge">Captive DNS ON</span>
+        <span class="badge">Portal Redirect Active</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>WiFi + MQTT Setup</h2>
+      <form>
+        <div class="grid">
+          <div><label>WiFi SSID</label><input value="Home-WLAN"></div>
+          <div><label>WiFi Password</label><input type="password" value="********"></div>
+          <div><label>MQTT Server</label><input value="192.168.1.20"></div>
+          <div><label>MQTT Port</label><input value="1883"></div>
+          <div><label>MQTT User</label><input value="mqtt_user"></div>
+          <div><label>MQTT Password</label><input type="password" value="********"></div>
+          <div class="full"><button type="button">Save and Apply</button></div>
+        </div>
+      </form>
+      <small>After save, device tries STA connect and keeps portal fallback if network is not reachable.</small>
+    </div>
+
+    <div class="mode-title">Preview 2: Connected Runtime Dashboard</div>
+    <div class="card">
+      <h1>CT Clamp Simulator</h1>
+      <div>Status: <span class="kpi">STA Connected</span> | MQTT: <span class="kpi">Connected</span></div>
+      <div>IP: 192.168.1.84</div>
+      <div>Uptime: 523s</div>
+    </div>
+
+    <div class="card">
+      <h2>Current Values</h2>
+      <div class="grid">
+        <div>Phase A: <b>16.3 A</b></div>
+        <div>Phase B: <b>14.9 A</b></div>
+        <div>Phase C: <b>15.6 A</b></div>
+        <div>Slave Link: <b>online</b></div>
+      </div>
+      <small>JSON APIs: /health, /values, /wifi-scan, /slave-ota-progress</small>
+    </div>
+
+    <div class="card">
+      <h2>OTA Update (Master)</h2>
+      <input type="file">
+      <br><br>
+      <button type="button">Upload Firmware</button>
+    </div>
+
+    <div class="card">
+      <h2>Slave Serial OTA</h2>
+      <input type="file">
+      <br><br>
+      <button type="button">Flash Slave via UART</button>
+      <small>Requires: Master GPIO32 -> Slave EN, Master GPIO33 -> Slave IO0</small>
+      <small>Flashing blocked until EN/BOOT self-test passes in current boot session.</small>
+      <div class="bar"><span></span></div>
+      <div class="mono" style="margin-top:6px">status: streaming | 67.2% (352256/524288) | gate: open | msg: upload in progress</div>
+    </div>
+
+    <div class="card">
+      <h2>Slave OTA Wiring Self-Test</h2>
+      <div class="row">
+        <button class="btn-alt" type="button">Run EN/BOOT Self-Test</button>
+      </div>
+      <div class="mono" style="margin-top:8px">self-test: PASS | EN/BOOT toggle OK and slave UART responsive</div>
+      <small>The test toggles slave EN and GPIO0 (BOOT) and checks UART responsiveness.</small>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -31,9 +31,9 @@
 ## Connector pinout to Harvi/Zappi (J4A/J4B/J4C)
 - J4A Pin 1: Phase A DAC (from Master GPIO25 through R1)
 - J4A Pin 2: GND
-- J4B Pin 1: Phase B DAC (from Slave GPIO25 through R2)
+- J4B Pin 1: Phase B DAC (from Slave GPIO26 through R2)
 - J4B Pin 2: GND
-- J4C Pin 1: Phase C DAC (from Slave GPIO26 through R3)
+- J4C Pin 1: Phase C DAC (from Slave GPIO25 through R3)
 - J4C Pin 2: GND
 
 ## OLED connector pinout (J6)
@@ -48,10 +48,17 @@ Notes:
 ## UART interconnect (on-board)
 - Master GPIO17 -> Slave GPIO16
 - Slave GPIO17 -> Master GPIO16
+- Master GPIO32 -> Slave EN (OTA reset control)
+- Master GPIO33 -> Slave GPIO0 (OTA boot mode control)
 - Common GND mandatory
 
+OTA control line notes:
+- Keep EN/IO0 control traces short and away from high-noise power entry.
+- Add 10k pull-up on Slave EN and Slave GPIO0 if not already provided by module/baseboard.
+- Prefer open-drain transistor stages for Master->Slave EN/IO0 to avoid contention during manual flashing.
+
 ## DFM checklist
-- Add test pads for: 5V, GND, UART_TX_M2S, UART_RX_S2M, PHASE_A/B/C
+- Add test pads for: 5V, GND, UART_TX_M2S, UART_RX_S2M, SLAVE_EN_CTL, SLAVE_BOOT_CTL, PHASE_A/B/C
 - Add board labels on silkscreen for all connector pins
 - Keep at least 3mm keepout from board edge for traces
 - Validate 3D clearance for ESP32 USB connector access

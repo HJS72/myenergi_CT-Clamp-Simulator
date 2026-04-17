@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MQTT Test Generator - Send test current values to Myenergi Harvi simulator
+MQTT Test Generator - Send test current values to CT Clamp Harvi simulator
 
 Usage:
     python3 mqtt_test_generator.py --broker 192.168.1.100 --current 25
@@ -121,7 +121,7 @@ class MQTTTestGenerator:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Send test MQTT current values to Myenergi Harvi simulator"
+        description="Send test MQTT current values to CT Clamp Harvi simulator"
     )
     parser.add_argument("--broker", default="192.168.1.100", help="MQTT broker address")
     parser.add_argument("--port", type=int, default=1883, help="MQTT broker port")

@@ -11,6 +11,12 @@ GND,J1B-1_GND,J2B-1_GND,Common ground between both ESP32 modules and I/O
 5V_IN,F1-2,J2A-19_5V,Protected 5V input to Slave module
 UART_TX_M2S,J1B-11_IO17,J2B-12_IO16,Master TX to Slave RX
 UART_RX_S2M,J2B-11_IO17,J1B-12_IO16,Slave TX to Master RX
+SLAVE_EN_CTL,J1A-7_IO32,R6-1,Master GPIO32 -> pull-up mid-point for slave EN control
+SLAVE_EN_CTL,R6-2,J2A-2_EN,Pull-up mid-point to slave EN pin
+SLAVE_BOOT_CTL,J1A-8_IO33,R7-1,Master GPIO33 -> pull-up mid-point for slave BOOT(GPIO0) control
+SLAVE_BOOT_CTL,R7-2,J2B-14_IO0,Pull-up mid-point to slave GPIO0 pin
+SLAVE_EN_PULLUP,J1A-1_3V3,R6-2,10k pull-up on slave EN to 3V3
+SLAVE_BOOT_PULLUP,J1A-1_3V3,R7-2,10k pull-up on slave GPIO0 to 3V3
 OLED_VCC,J1A-1_3V3,J6-1,OLED power output 3V3
 OLED_GND,J1B-1_GND,J6-2,OLED ground
 I2C_SCL,J1B-3_IO22,J6-3,OLED I2C clock
@@ -20,8 +26,8 @@ I2C_SDA,R5-1,J6-4,Optional pull-up resistor node SDA
 OLED_VCC,R4-2,J6-1,Optional pull-up to 3V3 for SCL
 OLED_VCC,R5-2,J6-1,Optional pull-up to 3V3 for SDA
 PHASE_A_DAC,J1A-9_IO25,J4A-1,Master DAC1 output to Harvi/Zappi Phase A
-PHASE_B_DAC,J2A-9_IO25,J4B-1,Slave DAC1 output to Harvi/Zappi Phase B
-PHASE_C_DAC,J2A-10_IO26,J4C-1,Slave DAC2 output to Harvi/Zappi Phase C
+PHASE_B_DAC,J2A-10_IO26,J4B-1,Slave DAC2 output to Harvi/Zappi Phase B
+PHASE_C_DAC,J2A-9_IO25,J4C-1,Slave DAC1 output to Harvi/Zappi Phase C
 GND_IO,J4A-2,J1B-1_GND,Ground for Harvi/Zappi Phase A connector
 GND_IO,J4B-2,J1B-1_GND,Ground for Harvi/Zappi Phase B connector
 GND_IO,J4C-2,J1B-1_GND,Ground for Harvi/Zappi Phase C connector

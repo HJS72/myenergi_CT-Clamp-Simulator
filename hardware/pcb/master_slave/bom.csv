@@ -10,6 +10,8 @@ J4C,1,Screw Terminal 2-pin,TerminalBlock_2_P5.08mm,Phase C + GND output to Harvi
 J6,1,Pin Header 1x4 2.54mm,PinHeader_1x04_P2.54mm_Vertical,OLED I2C header (3V3/GND/SCL/SDA)
 R4,1,4.7k,R_0805,Optional I2C pull-up on SCL to 3V3
 R5,1,4.7k,R_0805,Optional I2C pull-up on SDA to 3V3
+R6,1,10k,R_0805,Pull-up Slave EN to 3V3 (SLAVE_EN_CTL line)
+R7,1,10k,R_0805,Pull-up Slave GPIO0 to 3V3 (SLAVE_BOOT_CTL line)
 R1,1,10k,R_0805,Series resistor for PHASE_A_DAC
 R2,1,10k,R_0805,Series resistor for PHASE_B_DAC
 R3,1,10k,R_0805,Series resistor for PHASE_C_DAC

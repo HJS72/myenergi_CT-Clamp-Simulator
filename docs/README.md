@@ -30,6 +30,13 @@ This ESP32 firmware provides **three deployment modes**:
 - ESP32 DOIT DevKit v1 (or compatible)
 - USB cable for programming & power
 
+### Display (used in Wokwi and optional on real hardware)
+- 1.3 inch OLED I2C display (SSD1306 128x64)
+- VCC -> 3V3
+- GND -> GND
+- SCL -> GPIO22
+- SDA -> GPIO21
+
 ### Connections
 ```
 GPIO25 (DAC1) → Phase A signal output
@@ -37,6 +44,9 @@ GPIO26 (DAC2) → Phase B signal output
 GPIO32 (GPIO) → Phase C signal output (PWM or external DAC)
 
 GND → Common ground with CT sensor circuit
+
+I2C GPIO22 (SCL) → OLED SCL
+I2C GPIO21 (SDA) → OLED SDA
 ```
 
 ### Optional: CT Sensor Burden Circuit

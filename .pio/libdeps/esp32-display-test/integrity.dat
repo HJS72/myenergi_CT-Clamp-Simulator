@@ -1,0 +1,6 @@
+adafruit/Adafruit GFX Library@^1.11.10
+bblanchon/ArduinoJson@^6.21.2
+adafruit/Adafruit SH110X@^2.1.12
+Wire
+knolleary/PubSubClient@^2.8
+SPI

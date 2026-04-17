@@ -18,8 +18,8 @@ Die PCB-Dateien liegen hier:
 
 ## Elektrisches Mapping
 - Master GPIO25 -> Phase A
-- Slave GPIO25 -> Phase B
-- Slave GPIO26 -> Phase C
+- Slave GPIO25 -> Phase C
+- Slave GPIO26 -> Phase B
 - Master GPIO17 -> Slave GPIO16
 - Slave GPIO17 -> Master GPIO16
 - GND gemeinsam

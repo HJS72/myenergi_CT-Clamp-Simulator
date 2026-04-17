@@ -7,6 +7,10 @@ Supported deployments:
 - Standalone: one ESP32 generates all phases.
 - Master-Slave: Master handles WiFi/MQTT and Phase A, Slave generates Phase B and Phase C via UART commands.
 
+Display used across project (Wokwi + optional physical build):
+- 1.3 inch OLED I2C display (SSD1306 128x64)
+- Connected on ESP32 I2C pins: GPIO22 (SCL), GPIO21 (SDA)
+
 For full ASCII schematics and measurement drawings, see `docs/SCHEMATICS.md`.
 
 ## Recommended Hardware Topology
@@ -26,11 +30,19 @@ Master ESP32:
 - WiFi enabled, MQTT enabled
 
 Slave ESP32:
-- GPIO25 (DAC1): Phase B output
-- GPIO26 (DAC2): Phase C output
+- GPIO25 (DAC1): Phase C output
+- GPIO26 (DAC2): Phase B output
 - GPIO16 (UART RX2): from Master GPIO17
 - GPIO17 (UART TX2): to Master GPIO16
+- EN: controlled by Master GPIO32 for serial pass-through OTA
+- GPIO0: controlled by Master GPIO33 for serial pass-through OTA boot mode
 - WiFi disabled (low power)
+
+OLED display (on Master or standalone board):
+- VCC -> 3V3
+- GND -> GND
+- SCL -> GPIO22
+- SDA -> GPIO21
 
 ## Electrical Notes
 
@@ -56,22 +68,25 @@ Slave ESP32:
 - [ ] GPIO25 wired to Phase A input
 - [ ] GPIO17 TX -> Slave GPIO16 RX
 - [ ] GPIO16 RX <- Slave GPIO17 TX
+- [ ] (Optional) OLED SCL -> GPIO22 and SDA -> GPIO21
 - [ ] Common GND connected to Slave and Harvi/Zappi
 
 ### Slave board
 - [ ] USB 5V power connected
-- [ ] GPIO25 wired to Phase B input
-- [ ] GPIO26 wired to Phase C input
+- [ ] GPIO25 wired to Phase C input
+- [ ] GPIO26 wired to Phase B input
 - [ ] GPIO16 RX <- Master GPIO17 TX
 - [ ] GPIO17 TX -> Master GPIO16 RX
+- [ ] EN <- Master GPIO32 (or via transistor stage)
+- [ ] GPIO0 <- Master GPIO33 (or via transistor stage)
 - [ ] Common GND connected
 
 ## Oscilloscope Test Points
 
 Recommended probes:
 - CH1: Master GPIO25 (Phase A)
-- CH2: Slave GPIO25 (Phase B)
-- CH3: Slave GPIO26 (Phase C)
+- CH2: Slave GPIO25 (Phase C)
+- CH3: Slave GPIO26 (Phase B)
 - Scope GND: common system GND
 
 Recommended scope setup:
@@ -121,6 +136,7 @@ Harvi/Zappi not reading correctly:
 - `docs/TESTING.md` for validation procedure and oscilloscope workflow
 - `docs/MASTER_SLAVE_QUICKSTART.md` for bring-up sequence
 - `docs/SHOPPING_LIST.md` for bill of materials
+- `docs/WOKWI.md` for OLED wiring used in simulation
 
 ## References
 - ESP32 documentation: https://espressif.com

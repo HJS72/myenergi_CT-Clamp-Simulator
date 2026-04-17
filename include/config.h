@@ -4,23 +4,14 @@
 #include <Arduino.h>
 
 // ============= WiFi Configuration =============
-#ifdef WOKWI_SIM
-#define WIFI_SSID "Wokwi-GUEST"
-#define WIFI_PASSWORD ""
-#else
 #define WIFI_SSID "your-ssid"
 #define WIFI_PASSWORD "your-password"
-#endif
-#define WIFI_AP_SSID "myenergi-CT-Sim"
-#define WIFI_AP_PASSWORD ""
+#define WIFI_AP_SSID "CTSimulator"
+#define WIFI_AP_PASSWORD "CTSimulator"
 #define WIFI_TIMEOUT 10000  // milliseconds
 
 // ============= MQTT Configuration =============
-#ifdef WOKWI_SIM
-#define MQTT_SERVER "broker.hivemq.com"
-#else
 #define MQTT_SERVER "192.168.1.100"
-#endif
 #define MQTT_PORT 1883
 #define MQTT_RECONNECT_INTERVAL 5000  // milliseconds
 #define MQTT_TIMEOUT 5000
@@ -66,7 +57,7 @@
 #define CT_TURNS_RATIO 1000  // 1000:1 for SCT-013-000
 #define AMP_TO_DAC_RATIO (DAC_MAX_VALUE / CURRENT_MAX)
 
-// ============= OLED Display (I2C SSD1306) =============
+// ============= OLED Display (I2C SH1106) =============
 #define OLED_ENABLED true
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64

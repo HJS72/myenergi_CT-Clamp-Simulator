@@ -131,8 +131,8 @@ GND           → Harvi Ground
 
 **Slave:**
 ```
-GPIO25 (DAC1) → Harvi Phase B input
-GPIO26 (DAC2) → Harvi Phase C input
+GPIO25 (DAC1) → Harvi Phase C input
+GPIO26 (DAC2) → Harvi Phase B input
 GND           → Harvi Ground
 ```
 

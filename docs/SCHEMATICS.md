@@ -149,13 +149,13 @@ To Harvi/Zappi:
 │            Slave ESP32                              │
 ├─────────────────────────────────────────────────────┤
 │                                                     │
-│  GPIO25 (DAC1) ─────[10kΩ]──┬──► Phase B Signal  │
+│  GPIO25 (DAC1) ─────[10kΩ]──┬──► Phase C Signal  │
 │  (to Harvi)                  │                      │
 │                          [0.1µF]⏚                  │
 │                              │                      │
 │                             GND                     │
 │                                                     │
-│  GPIO26 (DAC2) ─────[10kΩ]──┬──► Phase C Signal  │
+│  GPIO26 (DAC2) ─────[10kΩ]──┬──► Phase B Signal  │
 │  (to Harvi)                  │                      │
 │                          [0.1µF]⏚                  │
 │                              │                      │
@@ -177,8 +177,8 @@ To Harvi/Zappi:
 
 To Harvi/Zappi:
 ┌──────────────────────────┐
-│  Phase B Signal ◄────────│
 │  Phase C Signal ◄────────│
+│  Phase B Signal ◄────────│
 │  GND (Common) ◄─────────│
 │                          │
 │ (Phase A from Master)    │
@@ -338,16 +338,16 @@ Slave ESP32:
   ☐ RX (GPIO16) ← Master TX (GPIO17)
   ☐ TX (GPIO17) → Master RX (GPIO16)
   ☐ GND common with Master
-  ☐ GPIO25 DAC → Oszi CH2 (optional test)
-  ☐ GPIO26 DAC → Oszi CH3 (optional test)
-  ☐ GPIO25 DAC → Harvi Phase B input
-  ☐ GPIO26 DAC → Harvi Phase C input
+   ☐ GPIO25 DAC → Oszi CH3 (optional test)
+   ☐ GPIO26 DAC → Oszi CH2 (optional test)
+   ☐ GPIO25 DAC → Harvi Phase C input
+   ☐ GPIO26 DAC → Harvi Phase B input
   ☐ GND → Harvi GND
 
 Oszilloskop (wenn Messung):
   ☐ CH1 Probe → Master GPIO25 (Phase A)
-  ☐ CH2 Probe → Slave GPIO25 (Phase B)
-  ☐ CH3 Probe → Slave GPIO26 (Phase C)
+   ☐ CH2 Probe → Slave GPIO26 (Phase B)
+   ☐ CH3 Probe → Slave GPIO25 (Phase C)
   ☐ GND Probe → Common GND all boards
   ☐ GND return to all boards
 ```

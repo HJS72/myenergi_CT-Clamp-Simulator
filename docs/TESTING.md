@@ -7,6 +7,7 @@
 - 2x USB Kabel
 - Computer mit PlatformIO
 - MQTT Broker (Mosquitto, Home Assistant, or Docker)
+- SSD1306 OLED 128x64 (1.3 inch, I2C) fur Wokwi oder optionalen Hardware-Check
 - Oscilloscope (optional aber empfohlen für Qualitäts-Tests)
 - oder Multimeter mit AC-Modus
 
@@ -97,6 +98,7 @@ CH3 → GPIO32: Sollte 50Hz Sinus zeigen, 240° Phase-Versatz
 - [ ] MQTT Verbindung etabliert
 - [ ] Boot-Nachricht sichtbar
 - [ ] MQTT-Werte ändern DAC-Werte
+- [ ] OLED zeigt A/B/C Werte konsistent zu den MQTT-Payloads (falls aktiviert)
 - [ ] Oszilloskop zeigt saubere 50Hz Sinuswelle
 
 ---
@@ -236,8 +238,8 @@ Master ESP32:
   GND    → GND Clip
 
 Slave ESP32:
-  GPIO25 → CH2 Probe
-  GPIO26 → CH3 Probe
+  GPIO25 → CH3 Probe
+  GPIO26 → CH2 Probe
   GND    → GND Clip (gemeinsam!)
 ```
 

@@ -23,3 +23,5 @@ H1,5,5,0,Top,Mounting hole corner
 H2,115,5,0,Top,Mounting hole corner
 H3,5,55,0,Top,Mounting hole corner
 H4,115,55,0,Top,Mounting hole corner
+R6,63,40,0,Top,10k pull-up for Slave EN (SLAVE_EN_CTL net)
+R7,63,44,0,Top,10k pull-up for Slave GPIO0/BOOT (SLAVE_BOOT_CTL net)
