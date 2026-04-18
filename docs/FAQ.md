@@ -145,7 +145,7 @@ sudo netstat -tulpn | grep 1883
 #define DAC_ENABLED true
 
 // Check MQTT messages are received
-// Serial should show: "📡 MQTT [home/power/phase_a/current]: X.XX"
+// Serial should show: "📡 MQTT [/esp32CTSimulator/PhaseA_Amp]: X.XX"
 ```
 
 **Test:**

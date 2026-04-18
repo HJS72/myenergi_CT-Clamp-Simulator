@@ -1,258 +1,149 @@
-# Myenergi Harvi/Zappi CT Sensor Simulator
+# Myenergi CT Clamp Simulator
 
-ESP32-based simulator that replaces current transformers (CT sensors) in Myenergi Harvi/Zappi devices. Receives RMS current values via MQTT and generates AC voltage signals that simulate actual current flow through CT sensors.
+Current release overview for the ESP32 master, slave and standalone firmware variants.
 
-## Overview
+## Release Snapshot
 
-### Problem
-The Myenergi Harvi and Zappi devices measure AC current using split-core current transformers (CT sensors). These produce AC voltage signals proportional to the current flowing through power lines. 
+- Master firmware includes a built-in web server with fallback AP mode.
+- The dashboard shows WiFi, MQTT and slave link state as `online` or `offline`.
+- `Online since` and `Last Change` are shown as relative durations.
+- The live graph refreshes in the same cycle as the text values.
+- The OLED live view now shows A, B, C, sum, power and comms state without the old Y row.
+- Slave serial OTA and OTA wiring self-test are exposed in the master web UI.
 
-### Solution
-This ESP32 firmware provides **three deployment modes**:
+## Deployment Modes
 
-**1. Standalone (Single ESP32)** - Simplest
-- Connects to WiFi and MQTT broker
-- Receives RMS current values for three AC phases
-- Generates AC signals for all three phases
+### Standalone
+- One ESP32
+- WiFi + MQTT on the same board
+- Generates all three phases locally
 
-**2. Master-Slave (Two ESP32s)** - Recommended
-- **Master**: Handles WiFi/MQTT, generates Phase A, controls Slave
-- **Slave**: Generates Phase B+C via ultra-low-latency UART link
-- Better power efficiency, extensible architecture
+### Master
+- One ESP32 with WiFi, MQTT and web UI
+- Generates Phase A locally
+- Drives slave updates over UART
 
-**3. Single Master** - WiFi only
-- Master generates only Phase A
-- For scenarios needing dedicated signal generation boards
+### Slave
+- One ESP32 dedicated to Phase B and Phase C generation
+- Receives commands from master over UART
+- Supports serial pass-through OTA via the master board
 
-## Hardware Requirements
+## Hardware Summary
 
-### ESP32 Board
-- ESP32 DOIT DevKit v1 (or compatible)
-- USB cable for programming & power
+- ESP32 DOIT DevKit v1 or compatible
+- Optional 1.3 inch OLED on I2C using the SH1106 controller
+- GPIO25: Phase A output on standalone/master
+- GPIO26: Phase B output on standalone/slave
+- GPIO32: Phase C output on standalone, slave EN control on master
+- GPIO33: Slave BOOT control on master
+- GPIO17 and GPIO16: UART link between master and slave
 
-### Display (used in Wokwi and optional on real hardware)
-- 1.3 inch OLED I2C display (SSD1306 128x64)
-- VCC -> 3V3
-- GND -> GND
-- SCL -> GPIO22
-- SDA -> GPIO21
+See [HARDWARE.md](HARDWARE.md) and [MASTER_SLAVE.md](MASTER_SLAVE.md) for wiring details.
 
-### Connections
-```
-GPIO25 (DAC1) → Phase A signal output
-GPIO26 (DAC2) → Phase B signal output
-GPIO32 (GPIO) → Phase C signal output (PWM or external DAC)
+## MQTT Contract
 
-GND → Common ground with CT sensor circuit
+The current firmware uses a configurable MQTT path, shortened to the last path segment. The default path is `esp32CTSimulator`.
 
-I2C GPIO22 (SCL) → OLED SCL
-I2C GPIO21 (SDA) → OLED SDA
-```
+### Inputs
 
-### Optional: CT Sensor Burden Circuit
-If integrating with existing CT circuits, add burden resistor:
-```
-DAC output → [16Ω resistor] → CT sensor secondary
-                                        ├─ CT output
-                                        └─ to ADC/comparator
+Canonical topics:
+
+```text
+/esp32CTSimulator/PhaseA_Amp
+/esp32CTSimulator/PhaseB_Amp
+/esp32CTSimulator/PhaseC_Amp
+/esp32CTSimulator/SumPower_kW
 ```
 
-## Configuration
+Compatibility topics without a leading slash are also subscribed.
 
-Edit `include/config.h` to customize:
+### Outputs
 
-### WiFi Settings
-```cpp
-#define WIFI_SSID "your-ssid"
-#define WIFI_PASSWORD "your-password"
+Published or retained datapoints:
+
+```text
+/esp32CTSimulator/PhaseA_Amp
+/esp32CTSimulator/PhaseB_Amp
+/esp32CTSimulator/PhaseC_Amp
+/esp32CTSimulator/SumPower_kW
+/esp32CTSimulator/Status
 ```
 
-### MQTT Settings
-```cpp
-#define MQTT_SERVER "192.168.1.100"
-#define MQTT_PORT 1883
+`Status` is published as JSON. The power graph uses `SumPower_kW` values from MQTT input.
 
-#define MQTT_TOPIC_PHASE_A "home/power/phase_a/current"
-#define MQTT_TOPIC_PHASE_B "home/power/phase_b/current"
-#define MQTT_TOPIC_PHASE_C "home/power/phase_c/current"
-```
+See [MQTT.md](MQTT.md) for examples.
 
-### Signal Generation
-```cpp
-#define AC_FREQUENCY 50      // 50Hz (EU) or 60Hz (US)
-#define CURRENT_MAX 100      // Maximum current (Amperes)
-#define UPDATE_INTERVAL 20   // 20ms for 50Hz signal
-```
+## Web UI
 
-**For Master-Slave Setup**, see [MASTER_SLAVE.md](MASTER_SLAVE.md)
+The master dashboard is served from `/`.
 
-## MQTT Interface
+Main runtime features:
 
-### Subscribe Topics (Inputs)
-Firmware subscribes to and listens for RMS current values:
+- WiFi + MQTT configuration forms
+- Web access credentials
+- Master OTA upload
+- Slave serial OTA upload
+- Slave EN and BOOT self-test
+- Health and values JSON endpoints
+- Live power graph with a maximum of five evenly spaced Y-axis labels
 
-```
-home/power/phase_a/current    → Current Phase A (float, Amperes)
-home/power/phase_b/current    → Current Phase B (float, Amperes)
-home/power/phase_c/current    → Current Phase C (float, Amperes)
-```
+Important JSON endpoints:
 
-**Example MQTT Publish:**
-```bash
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_a/current -m "23.5"
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_b/current -m "21.2"
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_c/current -m "25.8"
-```
+- `/health`
+- `/values`
+- `/graph`
+- `/mqtt-status`
+- `/wifi-scan`
+- `/ota-progress`
+- `/slave-ota-progress`
 
-### Publish Topics (Outputs)
-```
-myenergi/harvi/status         → Device status ("online"/"offline")
-```
+If station WiFi is unavailable, the device starts an AP named `CTSimulator` and serves the same configuration portal there.
 
-## Technical Details
+## Build And Upload
 
-### AC Signal Generation
-
-The firmware generates 50Hz AC sine waves with amplitude proportional to RMS current:
-
-1. **Three-Phase**: Outputs are phase-shifted by 120°
-2. **DC Bias**: Output centered at 2.5V (128/255 of 5V DAC range) to represent 0A
-3. **Amplitude**: ±2.5V max = ±100A RMS
-4. **Frequency**: 50Hz or 60Hz (configurable)
-
-**DAC Output Calculation:**
-```
-DAC_value = 128 + (sine × current_RMS × 128 / CURRENT_MAX)
-```
-
-- DAC range: 0-255 (8-bit)
-- 128 = 0 Amperes (DC bias)
-- 0-127 = Negative half-cycle
-- 129-255 = Positive half-cycle
-
-### Typical CT Sensor Specs
-- **Model**: YHDC SCT-013-000 (or similar)
-- **Turns Ratio**: 1000:1
-- **Burden**: ~16Ω
-- **Output**: 0-3V AC at rated current
-
-## Building & Uploading
-
-### Prerequisites
-- PlatformIO installed
-- ESP32 USB drivers installed
-
-### Build
+This repository includes a local PlatformIO CLI in `.venv/bin/pio`.
 
 ```bash
-# Standalone (original single ESP32)
 cd myenergi_CT-Clamp-Simulator
-pio run -e esp32
 
-# Master (WiFi + MQTT + Phase A)
-pio run -e esp32-master
+# Build
+.venv/bin/pio run -e esp32
+.venv/bin/pio run -e esp32-master
+.venv/bin/pio run -e esp32-slave
 
-# Slave (Phase B + C via UART)
-pio run -e esp32-slave
+# Upload
+.venv/bin/pio run -e esp32 -t upload
+.venv/bin/pio run -e esp32-master -t upload
+.venv/bin/pio run -e esp32-slave -t upload
 ```
 
-### Upload
+## Quick Verification
+
+1. Flash the master.
+2. Open the serial monitor.
+3. Confirm WiFi and MQTT come up, or that the fallback AP starts.
+4. Publish three phase values and optional `SumPower_kW`.
+5. Open the web UI and confirm live values, graph and status pills update.
+
+Example publish commands:
+
 ```bash
-pio run -e esp32 -t upload                # Standalone
-pio run -e esp32-master -t upload         # Master
-pio run -e esp32-slave -t upload          # Slave
+mosquitto_pub -h 192.168.1.100 -t "/esp32CTSimulator/PhaseA_Amp" -m "16.3"
+mosquitto_pub -h 192.168.1.100 -t "/esp32CTSimulator/PhaseB_Amp" -m "14.9"
+mosquitto_pub -h 192.168.1.100 -t "/esp32CTSimulator/PhaseC_Amp" -m "15.6"
+mosquitto_pub -h 192.168.1.100 -t "/esp32CTSimulator/SumPower_kW" -m "10.8"
 ```
 
-### Monitor
-```bash
-pio run -e esp32 -t monitor               # Standalone
-pio run -e esp32-master -t monitor        # Master
-pio run -e esp32-slave -t monitor         # Slave
-```
+## Documentation Map
 
-## Serial Output Example
+- [INDEX.md](INDEX.md) for navigation
+- [QUICKSTART.md](QUICKSTART.md) for first bring-up
+- [MASTER_SLAVE_QUICKSTART.md](MASTER_SLAVE_QUICKSTART.md) for the two-board setup
+- [MQTT.md](MQTT.md) for topic and payload details
+- [TESTING.md](TESTING.md) for verification workflows
 
-```
-=== Myenergi Harvi CT Simulator ===
-Initializing...
-✓ Signal generator initialized
-✓ MQTT handler initialized
-Connecting to WiFi: MyHome
-✓ WiFi connected!
-  IP: 192.168.1.50
-Connecting to MQTT: 192.168.1.100:1883
-✓ MQTT connected!
-✓ Setup complete!
+## Notes
 
-📡 MQTT [home/power/phase_a/current]: 23.50
-📡 MQTT [home/power/phase_b/current]: 21.20
-📡 MQTT [home/power/phase_c/current]: 25.80
-
---- Status Report ---
-WiFi: ✓ Connected
-MQTT: ✓ Connected
-Phase A: 23.50A (DAC: 186)
-Phase B: 21.20A (DAC: 180)
-Phase C: 25.80A (DAC: 192)
-```
-
-## Circuit Diagram
-
-```
-                    ESP32
-    ┌───────────────────────────────┐
-    │                               │
-    │  GPIO25 (DAC1) ─────────────┬─┤ ◄── AC Signal (Phase A)
-    │                            │ │
-    │                           [R]│ resistor ~16Ω (burden)
-    │                            │ │
-    │                            └─►─ To CT secondary
-    │
-    │  GPIO26 (DAC2) ─────────────┬─┤ ◄── AC Signal (Phase B)
-    │                            │ │
-    │                           [R]│
-    │                            │ │
-    │  GND ─────────────────────┴─┤ ◄── Ground
-    │
-    └───────────────────────────────┘
-```
-
-## Troubleshooting
-
-### No MQTT output
-- Check WiFi connection: Serial monitor shows `✓ WiFi connected`
-- Verify MQTT broker is running and accessible
-- Check topic names match configuration
-
-### Incorrect signal amplitude
-- Verify DAC pins are not used by other functions
-- Check `CURRENT_MAX` configuration matches system expectations
-- Measure DAC output with oscilloscope at different current levels
-
-### Signal distortion
-- Use shielded cables for DAC outputs
-- Add 0.1µF capacitor to DAC output for noise filtering
-- Keep DAC cables short and away from high-frequency signals
-
-## Future Enhancements
-
-- [ ] Web dashboard for configuration
-- [ ] Over-the-air firmware updates
-- [ ] Internal current calculation from power readings
-- [ ] Signal harmonics simulation
-- [ ] Phase correlation checking with actual grid
-- [ ] SD card logging of signal data
-
-## References
-
-- [OpenEnergyMonitor - CT Sensors](https://docs.openenergymonitor.org/electricity-monitoring/ct-sensors/index.html)
-- [YHDC SCT-013-000 Datasheet](https://www.yhdc.com/)
-- [ESP32 Technical Reference](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/)
-
-## License
-
-MIT License - Feel free to modify and use as needed.
-
-## Support
-
-For issues, improvements, or questions, refer to the source repository.
+- The UI version string is generated from build date and time.
+- Relative timestamps in the web UI are based on local device uptime because the firmware does not require RTC or NTP.
+- The current release favors the master web workflow over static preview HTML files.

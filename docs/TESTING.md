@@ -7,7 +7,7 @@
 - 2x USB Kabel
 - Computer mit PlatformIO
 - MQTT Broker (Mosquitto, Home Assistant, or Docker)
-- SSD1306 OLED 128x64 (1.3 inch, I2C) fur Wokwi oder optionalen Hardware-Check
+- SH1106 OLED 128x64 (1.3 inch, I2C) fur optionalen Hardware-Check
 - Oscilloscope (optional aber empfohlen für Qualitäts-Tests)
 - oder Multimeter mit AC-Modus
 
@@ -71,20 +71,20 @@ Phase C: 0.00A (DAC: 128)
 
 **1. MQTT Verbindung testen:**
 ```bash
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_a/current -m "25.5"
+mosquitto_pub -h 192.168.1.100 -t /esp32CTSimulator/PhaseA_Amp -m "25.5"
 ```
 
 Erwartet in Monitor:
 ```
-📡 MQTT [home/power/phase_a/current]: 25.50
+📡 MQTT [/esp32CTSimulator/PhaseA_Amp]: 25.50
 Phase A: 25.50A (DAC: 195)
 ```
 
 **2. Alle Phasen testen:**
 ```bash
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_a/current -m "25"
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_b/current -m "23"
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_c/current -m "24"
+mosquitto_pub -h 192.168.1.100 -t /esp32CTSimulator/PhaseA_Amp -m "25"
+mosquitto_pub -h 192.168.1.100 -t /esp32CTSimulator/PhaseB_Amp -m "23"
+mosquitto_pub -h 192.168.1.100 -t /esp32CTSimulator/PhaseC_Amp -m "24"
 ```
 
 **3. Oszilloskop-Messung (optional):**
@@ -193,16 +193,16 @@ Wenn nicht:
 **2. Daten durch MQTT senden:**
 
 ```bash
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_a/current -m "30"
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_b/current -m "25"
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_c/current -m "28"
+mosquitto_pub -h 192.168.1.100 -t /esp32CTSimulator/PhaseA_Amp -m "30"
+mosquitto_pub -h 192.168.1.100 -t /esp32CTSimulator/PhaseB_Amp -m "25"
+mosquitto_pub -h 192.168.1.100 -t /esp32CTSimulator/PhaseC_Amp -m "28"
 ```
 
 **Master Terminal sollte zeigen:**
 ```
-📡 MQTT [home/power/phase_a/current]: 30.00
-📡 MQTT [home/power/phase_b/current]: 25.00
-📡 MQTT [home/power/phase_c/current]: 28.00
+📡 MQTT [/esp32CTSimulator/PhaseA_Amp]: 30.00
+📡 MQTT [/esp32CTSimulator/PhaseB_Amp]: 25.00
+📡 MQTT [/esp32CTSimulator/PhaseC_Amp]: 28.00
 
 → Slave: B=25.00A, C=28.00A
 ```
@@ -262,7 +262,7 @@ Wenn nicht:
 **2. AC Amplitudе (mit 25A MQTT-Signal):**
 
 ```
-Sende: mosquitto_pub -h ... -t home/power/phase_a/current -m "25"
+Sende: mosquitto_pub -h ... -t /esp32CTSimulator/PhaseA_Amp -m "25"
 
 Erwartet:
   [Peak-to-Peak Spannung]
@@ -298,9 +298,9 @@ Wenn nicht:
 **4. Phase-Versatz (alle 3 Phasen mit gleichem Wert):**
 
 ```
-Sende: mosquitto_pub -h ... -t home/power/phase_a/current -m "50"
-       mosquitto_pub -h ... -t home/power/phase_b/current -m "50"
-       mosquitto_pub -h ... -t home/power/phase_c/current -m "50"
+Sende: mosquitto_pub -h ... -t /esp32CTSimulator/PhaseA_Amp -m "50"
+  mosquitto_pub -h ... -t /esp32CTSimulator/PhaseB_Amp -m "50"
+  mosquitto_pub -h ... -t /esp32CTSimulator/PhaseC_Amp -m "50"
 
 Oszi-Einstellung:
   - Time base: 5ms/div (full 20ms sichtbar)
@@ -374,9 +374,9 @@ client = mqtt.Client()
 client.connect(broker, 1883)
 
 def publish_values(a, b, c):
-    client.publish("home/power/phase_a/current", f"{a:.1f}")
-    client.publish("home/power/phase_b/current", f"{b:.1f}")
-    client.publish("home/power/phase_c/current", f"{c:.1f}")
+    client.publish("/esp32CTSimulator/PhaseA_Amp", f"{a:.1f}")
+    client.publish("/esp32CTSimulator/PhaseB_Amp", f"{b:.1f}")
+    client.publish("/esp32CTSimulator/PhaseC_Amp", f"{c:.1f}")
     print(f"Published: A={a}A, B={b}A, C={c}A")
 
 print("Starting Test Profiles...")
@@ -471,7 +471,7 @@ docker start mosquitto
 
 **3. MQTT Nachricht senden:**
 ```bash
-mosquitto_pub -h 192.168.1.100 -t home/power/phase_a/current -m "40"
+mosquitto_pub -h 192.168.1.100 -t /esp32CTSimulator/PhaseA_Amp -m "40"
 # Sollte funktonieren
 ```
 
@@ -657,9 +657,9 @@ while time.time() - start < 3600:
     b = 32 + random.uniform(-5, 5)
     c = 38 + random.uniform(-5, 5)
     
-    client.publish("home/power/phase_a/current", f"{a:.1f}")
-    client.publish("home/power/phase_b/current", f"{b:.1f}")
-    client.publish("home/power/phase_c/current", f"{c:.1f}")
+    client.publish("/esp32CTSimulator/PhaseA_Amp", f"{a:.1f}")
+    client.publish("/esp32CTSimulator/PhaseB_Amp", f"{b:.1f}")
+    client.publish("/esp32CTSimulator/PhaseC_Amp", f"{c:.1f}")
     
     elapsed = int(time.time() - start)
     print(f"[{elapsed}s] A={a:.1f}A, B={b:.1f}A, C={c:.1f}A")

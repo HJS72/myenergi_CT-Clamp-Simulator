@@ -283,9 +283,9 @@ Measurement Tips:
 │  • IP: 192.168.1.100            │
 │  • Port: 1883                   │
 │  • Topics:                      │
-│    home/power/phase_a/current   │
-│    home/power/phase_b/current   │
-│    home/power/phase_c/current   │
+│    /esp32CTSimulator/PhaseA_Amp │
+│    /esp32CTSimulator/PhaseB_Amp │
+│    /esp32CTSimulator/PhaseC_Amp │
 └─────────────────────────────────┘
         │ WiFi
         │

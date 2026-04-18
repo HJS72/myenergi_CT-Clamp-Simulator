@@ -1,148 +1,98 @@
 # Quick Start Guide
 
-Get your Myenergi Harvi Simulator up and running in 5 minutes!
+Get the current release running quickly on a master board with web UI and MQTT.
 
 ## Prerequisites
 
-- ESP32 DOIT DevKit v1 board
-- USB cable (USB-A to Micro USB)
-- WiFi network with IP-based MQTT broker
-- Computer with PlatformIO CLI or VS Code with PlatformIO extension
+- ESP32 DOIT DevKit v1 or compatible
+- USB cable
+- MQTT broker reachable from the ESP32
+- This repository with the local PlatformIO environment available
 
-## Step 1: Configure WiFi & MQTT (2 min)
-
-Edit `include/config.h`:
-
-```cpp
-// WiFi
-#define WIFI_SSID "MyHome"
-#define WIFI_PASSWORD "mypassword123"
-
-// MQTT
-#define MQTT_SERVER "192.168.1.100"      // IP of your MQTT broker
-#define MQTT_PORT 1883
-```
-
-## Step 2: Build & Upload (2 min)
-
-### Option A: Using VS Code + PlatformIO
-
-1. Open the project in VS Code
-2. Click **PlatformIO: Upload** in the bottom bar
-3. Connect ESP32 via USB
-4. Watch the build and upload
-
-### Option B: Using Terminal
+## Step 1: Flash The Master
 
 ```bash
 cd myenergi_CT-Clamp-Simulator
-pio run -e esp32 -t upload
+.venv/bin/pio run -e esp32-master -t upload
 ```
 
-## Step 3: Verify Connection (1 min)
-
-### Monitor Serial Output
+## Step 2: Open The Serial Monitor
 
 ```bash
-pio run -e esp32 -t monitor
+.venv/bin/pio run -e esp32-master -t monitor
 ```
 
-You should see:
+Expected boot flow:
 
-```
-=== Myenergi Harvi CT Simulator ===
+```text
+=== CT Clamp Simulator ===
+MASTER (Phase A + MQTT)
 Initializing...
 ✓ Signal generator initialized
 ✓ MQTT handler initialized
-Connecting to WiFi: MyHome
-✓ WiFi connected!
-  IP: 192.168.1.50
-Connecting to MQTT: 192.168.1.100:1883
-✓ MQTT connected!
+✓ Setup complete!
 ```
 
-## Step 4: Test with MQTT (Optional, 1 min)
+If no station WiFi is configured or the connection fails, the device starts the fallback AP `CTSimulator`.
 
-Send test current values:
+## Step 3: Open The Web UI
+
+- If the board joins your WiFi, open its DHCP address in a browser.
+- If the board starts the fallback AP, connect to `CTSimulator` and open `http://192.168.4.1/`.
+
+In the UI you can:
+
+- Set WiFi and MQTT values
+- Watch WiFi, MQTT and slave status
+- See `Last Change` and `Online since`
+- Upload master and slave firmware
+
+## Step 4: Publish Test Values
 
 ```bash
-# Terminal 1: Monitor MQTT messages
-mosquitto_sub -h 192.168.1.100 -t "myenergi/harvi/#"
-
-# Terminal 2: Publish current values
-mosquitto_pub -h 192.168.1.100 -t "home/power/phase_a/current" -m "25"
-mosquitto_pub -h 192.168.1.100 -t "home/power/phase_b/current" -m "23"
-mosquitto_pub -h 192.168.1.100 -t "home/power/phase_c/current" -m "24"
+mosquitto_pub -h 192.168.1.100 -t "/esp32CTSimulator/PhaseA_Amp" -m "25"
+mosquitto_pub -h 192.168.1.100 -t "/esp32CTSimulator/PhaseB_Amp" -m "23"
+mosquitto_pub -h 192.168.1.100 -t "/esp32CTSimulator/PhaseC_Amp" -m "24"
+mosquitto_pub -h 192.168.1.100 -t "/esp32CTSimulator/SumPower_kW" -m "8.7"
 ```
 
-Watch the serial monitor - you should see:
+Then verify in the browser:
 
-```
-📡 MQTT [home/power/phase_a/current]: 25.00
---- Status Report ---
-Phase A: 25.00A (DAC: 195)
-Phase B: 23.00A (DAC: 191)
-Phase C: 24.00A (DAC: 193)
-```
+- WiFi and MQTT pills show `online`
+- Power text and graph update together
+- `Last Change` increases after the most recent MQTT update
 
-## Step 5: Hardware Connection
+## Step 5: Optional Slave Bring-Up
 
-Connect GPIO pins to your Harvi/Zappi system:
+If you use a second ESP32:
 
-```
-ESP32 GPIO25 (DAC1) ─→ Phase A CT Signal Input
-ESP32 GPIO26 (DAC2) ─→ Phase B CT Signal Input
-ESP32 GPIO32         ─→ Phase C CT Signal Input (or PWM)
-ESP32 GND            ─→ Ground
+```bash
+.venv/bin/pio run -e esp32-slave -t upload
 ```
 
-See [Hardware Setup](docs/HARDWARE.md) for detailed wiring.
+Then continue with [MASTER_SLAVE_QUICKSTART.md](MASTER_SLAVE_QUICKSTART.md).
 
 ## Troubleshooting
 
-### ✗ ESP32 doesn't connect to WiFi
+### No web page reachable
 
-**Solution:**
-- Verify WiFi SSID and password in `config.h`
-- Check that 2.4GHz WiFi is available (not 5GHz only)
-- Restart the ESP32
+- Check whether the device started as station or fallback AP
+- Verify the USB serial monitor for the current IP address
+- Reconnect power after changing WiFi credentials
 
-### ✗ MQTT connection fails
+### MQTT stays offline
 
-**Solution:**
-- Verify MQTT broker IP is correct: `ping 192.168.1.100`
-- Check broker is running: `mosquitto_pub -h 192.168.1.100 -t test -m test`
-- Verify firewall allows port 1883
+- Verify broker IP, port and credentials in the web UI
+- Confirm your publish topics match the configured path
+- Use `mosquitto_sub -t "/esp32CTSimulator/#"` to inspect traffic
 
-### ✗ No signal output on GPIO pins
+### OLED does not match the web UI
 
-**Solution:**
-- Verify ESP32 is receiving MQTT messages (check serial monitor)
-- Test DAC with multimeter - should show ~1.65V at rest
-- Confirm GPIO25/26 are not used elsewhere
+- The OLED is a compact summary, not a full web mirror
+- Use the display test environments if the panel itself looks suspect
 
-### ✗ Signal appears but Harvi doesn't recognize it
+## Next Documents
 
-**Solution:**
-- Check signal frequency is 50Hz or 60Hz
-- Verify amplitude matches settings
-- Check phase shifts are correct (120° between phases)
-- Add burden resistor (16Ω) if using with actual CT sensor
-
-## Next Steps
-
-- **Fine-tuning**: Adjust `CURRENT_MAX` and phase offsets in `config.h`
-- **Automation**: Set up Home Assistant automations to feed current data
-- **Monitoring**: View live current values on dashboard
-- **Advanced**: See [MQTT Configuration](docs/MQTT.md) for publish scripts
-
-## Support
-
-- Full documentation in `/docs`
-- Hardware wiring details: [HARDWARE.md](docs/HARDWARE.md)
-- MQTT setup guide: [MQTT.md](docs/MQTT.md)
-- Troubleshooting: [README.md](docs/README.md#troubleshooting)
-
----
-
-**Ready?** Start with Step 1 above! 🚀
+- [MQTT.md](MQTT.md)
+- [MASTER_SLAVE_QUICKSTART.md](MASTER_SLAVE_QUICKSTART.md)
+- [TESTING.md](TESTING.md)

@@ -132,9 +132,9 @@ Byte 7:   PAD       0x00        (reserved)
 
 ```
 MQTT Input:
-  home/power/phase_a/current → 25.5A
-  home/power/phase_b/current → 23.0A
-  home/power/phase_c/current → 24.8A
+  /esp32CTSimulator/PhaseA_Amp → 25.5A
+  /esp32CTSimulator/PhaseB_Amp → 23.0A
+  /esp32CTSimulator/PhaseC_Amp → 24.8A
 
 Master ←MQTT→ Broker
   ↓

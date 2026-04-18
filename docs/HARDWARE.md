@@ -7,8 +7,8 @@ Supported deployments:
 - Standalone: one ESP32 generates all phases.
 - Master-Slave: Master handles WiFi/MQTT and Phase A, Slave generates Phase B and Phase C via UART commands.
 
-Display used across project (Wokwi + optional physical build):
-- 1.3 inch OLED I2C display (SSD1306 128x64)
+Display used across project (optional physical build and display test environments):
+- 1.3 inch OLED I2C display (SH1106 128x64)
 - Connected on ESP32 I2C pins: GPIO22 (SCL), GPIO21 (SDA)
 
 For full ASCII schematics and measurement drawings, see `docs/SCHEMATICS.md`.
@@ -136,7 +136,6 @@ Harvi/Zappi not reading correctly:
 - `docs/TESTING.md` for validation procedure and oscilloscope workflow
 - `docs/MASTER_SLAVE_QUICKSTART.md` for bring-up sequence
 - `docs/SHOPPING_LIST.md` for bill of materials
-- `docs/WOKWI.md` for OLED wiring used in simulation
 
 ## References
 - ESP32 documentation: https://espressif.com

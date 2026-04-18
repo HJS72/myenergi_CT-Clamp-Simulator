@@ -160,6 +160,8 @@ void MQTTHandler::subscribe() {
         Serial.println("MQTT Subscribing to topics:");
     }
     
+    // Subscribe to both canonical and compatibility topic variants so the
+    // firmware works with brokers/UIs that normalize away the leading slash.
     // Canonical topics with leading slash
     snprintf(topic, sizeof(topic), "/%s/PhaseA_Amp", mqttPath);
     if (DEBUG_ENABLED) Serial.print("  [Canon] ");

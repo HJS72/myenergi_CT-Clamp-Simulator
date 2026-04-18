@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-MQTT Test Generator - Send test current values to CT Clamp Harvi simulator
+MQTT Test Generator - publish test values to the current MQTT path layout.
 
 Usage:
-    python3 mqtt_test_generator.py --broker 192.168.1.100 --current 25
+    python3 mqtt_test_generator.py --broker 192.168.1.100 --path esp32CTSimulator --current 25
 """
 
 import paho.mqtt.client as mqtt
@@ -13,9 +13,10 @@ import math
 import sys
 
 class MQTTTestGenerator:
-    def __init__(self, broker, port=1883, client_id="mqtt-test-gen"):
+    def __init__(self, broker, port=1883, mqtt_path="esp32CTSimulator", client_id="mqtt-test-gen"):
         self.broker = broker
         self.port = port
+        self.mqtt_path = mqtt_path.strip("/") or "esp32CTSimulator"
         self.client_id = client_id
         self.client = mqtt.Client(client_id=client_id)
         self.client.on_connect = self.on_connect
@@ -49,16 +50,16 @@ class MQTTTestGenerator:
         self.client.disconnect()
         
     def send_current(self, phase_a, phase_b=None, phase_c=None):
-        """Send current values for all three phases"""
+        """Send current values for all three phases using the active topic path."""
         if phase_b is None:
             phase_b = phase_a * 0.9
         if phase_c is None:
             phase_c = phase_a * 0.8
             
         topics = [
-            ("home/power/phase_a/current", phase_a),
-            ("home/power/phase_b/current", phase_b),
-            ("home/power/phase_c/current", phase_c),
+            (f"/{self.mqtt_path}/PhaseA_Amp", phase_a),
+            (f"/{self.mqtt_path}/PhaseB_Amp", phase_b),
+            (f"/{self.mqtt_path}/PhaseC_Amp", phase_c),
         ]
         
         for topic, value in topics:
@@ -125,6 +126,7 @@ def main():
     )
     parser.add_argument("--broker", default="192.168.1.100", help="MQTT broker address")
     parser.add_argument("--port", type=int, default=1883, help="MQTT broker port")
+    parser.add_argument("--path", default="esp32CTSimulator", help="MQTT topic path without leading slash")
     parser.add_argument("--test", choices=["ramp", "sine", "constant"], default="ramp",
                        help="Test type to run")
     parser.add_argument("--current", type=float, default=50, help="Current amplitude (Amperes)")
@@ -134,13 +136,13 @@ def main():
     args = parser.parse_args()
     
     # Create generator
-    gen = MQTTTestGenerator(args.broker, args.port)
+    gen = MQTTTestGenerator(args.broker, args.port, args.path)
     
     if not gen.connect():
         sys.exit(1)
     
     try:
-        print(f"Testing with broker: {args.broker}:{args.port}\n")
+        print(f"Testing with broker: {args.broker}:{args.port} | path: /{gen.mqtt_path}\n")
         
         if args.test == "ramp":
             gen.test_ramp(args.current, args.duration)

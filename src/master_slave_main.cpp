@@ -928,6 +928,8 @@ static uint8_t monthFromDateToken(const char* monthToken) {
 static void getProjectVersion(char* out, size_t outSize) {
     if (out == nullptr || outSize == 0) return;
 
+    // Encode the build timestamp into the UI version string so field devices
+    // can be matched to an exact flashed build without a separate release file.
     const char* date = __DATE__;  // "Mmm dd yyyy"
     const char* time = __TIME__;  // "hh:mm:ss"
 
@@ -1017,9 +1019,13 @@ static String buildDashboardHtml() {
     String slavePillClass = slaveConnected ? "status-pill status-ok" : "status-pill status-bad";
     String slavePillText = slaveConnected ? "online" : "offline";
     unsigned long slaveOnlineSinceS = (slaveConnected && gSlaveOnlineSinceMs > 0) ? ((millis() - gSlaveOnlineSinceMs) / 1000UL) : 0;
-    String slaveOnlineSinceText = slaveConnected ? ("Online seit " + formatDurationAdaptive(slaveOnlineSinceS)) : "";
+    String slaveOnlineSinceText = slaveConnected ? ("Online since " + formatDurationAdaptive(slaveOnlineSinceS)) : "";
+    // The runtime has no RTC/NTP dependency, so the dashboard shows MQTT age
+    // relative to the local receive time instead of an absolute wall-clock time.
+    unsigned long lastChangeSinceS = (gLastMqttMessageMs > 0) ? ((millis() - gLastMqttMessageMs) / 1000UL) : 0;
+    String lastChangeText = (gLastMqttMessageMs > 0) ? ("Last Change: " + formatDurationAdaptive(lastChangeSinceS)) : "";
     String mqttSessionClass = "status-pill status-bad";
-    String mqttSessionText = "disconnected";
+    String mqttSessionText = "offline";
     String mqttServerClass = "status-pill status-bad";
     String mqttServerText = "failed";
     String mqttLoginClass = "status-pill";
@@ -1032,7 +1038,7 @@ static String buildDashboardHtml() {
         const bool mqttLoginConfigured = gMQTT->isLoginConfigured();
         const bool mqttLoginOk = gMQTT->isLoginOk();
         mqttSessionClass = mqttConnected ? "status-pill status-ok" : "status-pill status-bad";
-        mqttSessionText = mqttConnected ? "connected" : "disconnected";
+        mqttSessionText = mqttConnected ? "online" : "offline";
         mqttServerClass = mqttServerOk ? "status-pill status-ok" : "status-pill status-bad";
         mqttServerText = mqttServerOk ? "OK" : "failed";
         if (mqttLoginConfigured) {
@@ -1046,12 +1052,13 @@ static String buildDashboardHtml() {
 
     // Header card — WiFi / MQTT / Slave status pills
     String wifiPillClass = (WiFi.status() == WL_CONNECTED && !gAccessPointMode) ? "status-pill status-ok" : "status-pill status-bad";
-    String wifiPillText  = gAccessPointMode ? "AP mode" : (WiFi.status() == WL_CONNECTED ? "connected" : "disconnected");
+    String wifiPillText  = gAccessPointMode ? "AP mode" : (WiFi.status() == WL_CONNECTED ? "online" : "offline");
     html += "<div class='card'><h1>CT Clamp Simulator <small style='font-size:.52em;color:#64748b;font-weight:600'>v" + String(projectVersion) + "</small></h1>";
     html += "<div style='display:flex;gap:16px;flex-wrap:wrap;align-items:center'>";
     html += "<div>WiFi: <span class='" + wifiPillClass + "'>" + wifiPillText + "</span></div>";
     html += "<div>MQTT: <span id='mqtt-session-pill' class='" + mqttSessionClass + "'>" + mqttSessionText + "</span></div>";
     html += "<div>Slave: <span id='slave-link-pill' class='" + slavePillClass + "'>" + slavePillText + "</span> <span id='slave-online-since' style='color:#6b7280;font-size:.9em'>" + slaveOnlineSinceText + "</span></div>";
+    html += "<div><span id='last-change-time' style='color:#6b7280;font-size:.9em'>" + lastChangeText + "</span></div>";
     html += "</div>";
     html += "</div>";
 
@@ -1142,7 +1149,7 @@ static String buildDashboardHtml() {
     html += "return parts.join(' ');};";
     html += "async function pollMqttStatus(){try{const r=await fetch('/mqtt-status');const d=await r.json();";
     html += "const setPill=(id,text,ok,neutral)=>{const el=document.getElementById(id);if(!el)return;el.textContent=text;el.className=neutral?'status-pill':('status-pill '+(ok?'status-ok':'status-bad'));};";
-    html += "setPill('mqtt-session-pill',d.connected?'connected':'disconnected',!!d.connected,false);";
+    html += "setPill('mqtt-session-pill',d.connected?'online':'offline',!!d.connected,false);";
     html += "setPill('mqtt-server-pill',d.server_ok?'OK':'failed',!!d.server_ok,false);";
     html += "setPill('mqtt-login-pill',d.login_configured?(d.login_ok?'OK':'failed'):'not used',!!d.login_ok,!d.login_configured);";
     html += "const stateText=document.getElementById('mqtt-state-text');if(stateText)stateText.textContent=d.state_text||'unknown';";
@@ -1150,8 +1157,9 @@ static String buildDashboardHtml() {
     html += "const lastTopic=document.getElementById('mqtt-last-topic');if(lastTopic)lastTopic.textContent=d.last_topic||'-';";
     html += "const lastPayload=document.getElementById('mqtt-last-payload');if(lastPayload)lastPayload.textContent=d.last_payload||'-';";
     html += "const slPill=document.getElementById('slave-link-pill');if(slPill){slPill.textContent=d.slave_connected?'online':'offline';slPill.className=d.slave_connected?'status-pill status-ok':'status-pill status-bad';}";
-    html += "const slSince=document.getElementById('slave-online-since');if(slSince){slSince.textContent=d.slave_connected?('Online seit '+fmtDuration(d.slave_online_since_s||0)):'';}";
+    html += "const slSince=document.getElementById('slave-online-since');if(slSince){slSince.textContent=d.slave_connected?('Online since '+fmtDuration(d.slave_online_since_s||0)):'';}";
     html += "const slUart=document.getElementById('slave-uart-rx');if(slUart)slUart.textContent='UART bytes='+(d.slave_rx_bytes||0)+' hb='+(d.slave_heartbeat_count||0)+' ack='+(d.slave_ack_count||0);";
+    html += "const lastChangeEl=document.getElementById('last-change-time');if(lastChangeEl){lastChangeEl.textContent=d.last_message_age_s>0?('Last Change: '+fmtDuration(d.last_message_age_s)):(d.last_message_ms>0?'Last Change: 0s':'');}";
     html += "}catch(e){}}";
     html += "const uploadWithProgress=(formId,fileId,url,barId,textId,label)=>{const form=document.getElementById(formId);const fileEl=document.getElementById(fileId);if(!form||!fileEl)return;form.addEventListener('submit',(ev)=>{ev.preventDefault();if(!fileEl.files||fileEl.files.length===0){const t=document.getElementById(textId);if(t)t.textContent='status: no file selected';return;}const fd=new FormData();fd.append('firmware',fileEl.files[0]);const xhr=new XMLHttpRequest();xhr.open('POST',url,true);const t=document.getElementById(textId);const b=document.getElementById(barId);if(t)t.textContent='status: uploading...';xhr.upload.onprogress=(e)=>{if(!e.lengthComputable)return;const pct=Math.max(0,Math.min(100,(e.loaded*100.0)/e.total));if(b)b.style.width=pct.toFixed(1)+'%';if(t)t.textContent='status: '+label+' upload '+pct.toFixed(1)+'% ('+e.loaded+'/'+e.total+')';};xhr.onload=()=>{if(b)b.style.width='100%';if(t)t.textContent='status: '+label+' upload finished ('+xhr.status+')';};xhr.onerror=()=>{if(t)t.textContent='status: '+label+' upload failed';};xhr.send(fd);});};";
     html += "uploadWithProgress('master-ota-form','master-ota-file','/ota','master-ota-bar','master-ota-text','master');";
@@ -1208,7 +1216,7 @@ static String buildDashboardHtml() {
     html += "let yMax=Math.ceil(maxVal/yStep)*yStep;";
     html += "yMin=Math.min(yMin,0);yMax=Math.max(yMax,0);";
     html += "if(yMin===yMax){yMin-=yStep;yMax+=yStep;}";
-    html += "const yTickCount=Math.max(1,Math.min(12,Math.round((yMax-yMin)/yStep)));";
+    html += "const yTickCount=Math.max(1,Math.min(4,Math.round((yMax-yMin)/yStep)));";
     html += "const yLabelDecimals=yStep<1?1:0;";
     html += "const mapY=(v)=>PT+ph-(((v-yMin)/(yMax-yMin))*ph);";
     html += "ctx.font='11px Verdana,sans-serif';";
@@ -1261,7 +1269,7 @@ static String buildDashboardHtml() {
     html += "ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillStyle='#374151';";
     html += "ctx.fillText('Time',PL+pw/2,ch-2);}catch(e){}}";
     html += "updatePowerGraph();setInterval(updatePowerGraph,2500);";
-    html += "pollMasterOta();setInterval(pollMasterOta,1000);pollSlaveOta();setInterval(pollSlaveOta,1000);pollMqttStatus();setInterval(pollMqttStatus,3000);";
+    html += "pollMasterOta();setInterval(pollMasterOta,1000);pollSlaveOta();setInterval(pollSlaveOta,1000);pollMqttStatus();setInterval(()=>{updatePowerGraph();pollMqttStatus();},2500);";
     html += "</script>";
     html += "</div></body></html>";
     return html;
@@ -1295,7 +1303,11 @@ static String mqttStatusJson() {
     body += "\"state_code\":" + String(stateCode) + ",";
     body += "\"last_topic\":\"" + jsonEscape(String(gLastMqttTopic)) + "\",";
     body += "\"last_payload\":\"" + jsonEscape(String(gLastMqttPayload)) + "\",";
+    // Expose both raw receive time and derived age so the web UI can refresh
+    // relative timestamps without inferring device uptime on the client.
+    unsigned long lastMessageAgeS = (gLastMqttMessageMs > 0) ? ((millis() - gLastMqttMessageMs) / 1000UL) : 0;
     body += "\"last_message_ms\":" + String(gLastMqttMessageMs) + ",";
+    body += "\"last_message_age_s\":" + String(lastMessageAgeS) + ",";
     body += "\"server\":\"" + jsonEscape(String(gRuntimeConfig.mqttServer)) + "\",";
     body += "\"port\":" + String(gRuntimeConfig.mqttPort) + ",";
     body += "\"slave_connected\":" + String(slaveConnected ? "true" : "false") + ",";
@@ -2964,14 +2976,6 @@ void updateDisplay() {
     if (phaseB != CURRENT_DEFAULT) { sum += phaseB; hasAny = true; }
     if (phaseC != CURRENT_DEFAULT) { sum += phaseC; hasAny = true; }
 
-    float maxAbs = 1.0f;
-    for (int i = 0; i < GRAPH_SAMPLES; i++) {
-        float v = graphHistory[i];
-        if (v == CURRENT_DEFAULT) continue;
-        float absV = fabsf(v);
-        if (absV > maxAbs) maxAbs = absV;
-    }
-
     bool mqttOn = false;
     bool slaveOn = false;
     #if DEVICE_MODE == DEVICE_MODE_MASTER
@@ -2985,13 +2989,14 @@ void updateDisplay() {
     slaveOn = false;
     #endif
 
-    char va[7], vb[7], vc[7], vs[7], vp[8], vy[7], vmq[2], vsl[2];
+    // Keep the OLED summary compact: live phase values, aggregate power, and
+    // comms state fit on one screen while the graph uses the remaining space.
+    char va[7], vb[7], vc[7], vs[7], vp[8], vmq[2], vsl[2];
     if (phaseA == CURRENT_DEFAULT) strcpy(va, "  ---"); else snprintf(va, sizeof(va), "%5.1f", phaseA);
     if (phaseB == CURRENT_DEFAULT) strcpy(vb, "  ---"); else snprintf(vb, sizeof(vb), "%5.1f", phaseB);
     if (phaseC == CURRENT_DEFAULT) strcpy(vc, "  ---"); else snprintf(vc, sizeof(vc), "%5.1f", phaseC);
     if (!hasAny)                   strcpy(vs, "  ---"); else snprintf(vs, sizeof(vs), "%5.1f", sum);
     if (!gHasReceivedSumWatt) strcpy(vp, "  ---"); else snprintf(vp, sizeof(vp), "%5.1f", gLastReceivedSumWatt);
-    snprintf(vy, sizeof(vy), "%5.1f", maxAbs);
     strcpy(vmq, mqttOn ? "+" : "-");
     strcpy(vsl, slaveOn ? "+" : "-");
 
@@ -3004,9 +3009,8 @@ void updateDisplay() {
     const int yC = 16;
     const int yS = 24;
     const int yP = 32;
-    const int yY = 40;
-    const int yMQTT = 48;
-    const int ySLAVE = 56;
+    const int yMQTT = 40;
+    const int ySLAVE = 48;
 
     gDisplay->setCursor(0, yA);
     gDisplay->print("A:");
@@ -3040,12 +3044,6 @@ void updateDisplay() {
     gDisplay->setCursor(42, yP);
     gDisplay->print("kW");
 
-    gDisplay->setCursor(0, yY);
-    gDisplay->print("Y:");
-    gDisplay->setCursor(12, yY);
-    gDisplay->print(vy);
-    gDisplay->setCursor(42, yY);
-    gDisplay->print("kW");
     gDisplay->setCursor(0, yMQTT);
     gDisplay->print("MQTT:");
     gDisplay->setCursor(38, yMQTT);

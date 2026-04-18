@@ -1,8 +1,9 @@
 #!/bin/bash
-# MQTT Test Script - Send test current values to ESP32
+# MQTT Test Script - Send test current values to the current topic layout
 
 BROKER="192.168.1.100"
 PORT="1883"
+TOPIC_PATH="${TOPIC_PATH:-esp32CTSimulator}"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -10,6 +11,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}Myenergi Harvi - MQTT Test Script${NC}\n"
+echo "Using topic path: /$TOPIC_PATH"
 
 # Check if mosquitto_pub is installed
 if ! command -v mosquitto_pub &> /dev/null; then
@@ -34,17 +36,17 @@ test_values=("5" "10" "15" "20" "25" "30" "25" "20" "15" "10" "5" "0")
 
 for value in "${test_values[@]}"; do
     echo -e "  Phase A: ${GREEN}$value A${NC}"
-    mosquitto_pub -h $BROKER -p $PORT -t "home/power/phase_a/current" -m "$value"
+    mosquitto_pub -h "$BROKER" -p "$PORT" -t "/$TOPIC_PATH/PhaseA_Amp" -m "$value"
     
     # Phase B shifted by ~90 degrees in amplitude
     pb_value=$(echo "$value * 0.7" | bc)
     echo -e "  Phase B: ${GREEN}$pb_value A${NC}"
-    mosquitto_pub -h $BROKER -p $PORT -t "home/power/phase_b/current" -m "$pb_value"
+    mosquitto_pub -h "$BROKER" -p "$PORT" -t "/$TOPIC_PATH/PhaseB_Amp" -m "$pb_value"
     
     # Phase C shifted
     pc_value=$(echo "$value * 0.5" | bc)
     echo -e "  Phase C: ${GREEN}$pc_value A${NC}"
-    mosquitto_pub -h $BROKER -p $PORT -t "home/power/phase_c/current" -m "$pc_value"
+    mosquitto_pub -h "$BROKER" -p "$PORT" -t "/$TOPIC_PATH/PhaseC_Amp" -m "$pc_value"
     
     sleep 1
 done

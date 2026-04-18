@@ -16,7 +16,7 @@
 |------|--------|-------|---------|-------|------|
 | **ESP32 Development Board** | ESP32 DOIT DevKit v1 | 1x (Standalone) oder 2x (Master-Slave) | 8-12 | 12-24 | [AliExpress](https://de.aliexpress.com/item/4000242274906.html) |
 | | | | | | [Amazon.de](https://www.amazon.de/AZDelivery-NodeMCU-Development-Bluetooth-Compatible/dp/B074RGW2VQ) |
-| **OLED Display (I2C)** | SSD1306 128x64, 1.3 inch | 1x | 3-8 | 3-8 | [AliExpress](https://de.aliexpress.com/wholesale?SearchText=ssd1306+1.3+inch+oled) |
+| **OLED Display (I2C)** | SH1106 128x64, 1.3 inch | 1x | 3-8 | 3-8 | [AliExpress](https://de.aliexpress.com/wholesale?SearchText=sh1106+1.3+inch+oled) |
 
 **Empfehlung:** 2x kaufen (nur €2-3 mehr) = Backup und für Tests
 
