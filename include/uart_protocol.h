@@ -2,6 +2,7 @@
 #define UART_PROTOCOL_H
 
 #include <Arduino.h>
+#include <cmath>
 #include <cstring>
 
 /**
@@ -12,8 +13,8 @@
  * 
  * SYNC:      0x55 (start marker)
  * LEN:       2 (fixed payload length)
- * Phase_B:   uint8_t (0-255, maps to 0-100A)
- * Phase_C:   uint8_t (0-255, maps to 0-100A)
+ * Phase_B:   uint8_t (0-255, maps to -CURRENT_MAX..+CURRENT_MAX)
+ * Phase_C:   uint8_t (0-255, maps to -CURRENT_MAX..+CURRENT_MAX)
  * CRC16:     16-bit checksum
  * END:       0xAA (end marker)
  * 
@@ -27,8 +28,8 @@
 struct UARTPacket {
     uint8_t sync;        // 0x55
     uint8_t len;         // 2
-    uint8_t phase_b;     // 0-255
-    uint8_t phase_c;     // 0-255
+    uint8_t phase_b;     // 0-255 (signed current encoded)
+    uint8_t phase_c;     // 0-255 (signed current encoded)
     uint8_t crc_low;     // CRC16 low byte
     uint8_t crc_high;    // CRC16 high byte
     uint8_t end;         // 0xAA
@@ -39,6 +40,18 @@ struct UARTPacket {
 
 class UARTProtocol {
 public:
+    static uint8_t encodeSignedCurrent(float amps) {
+        const float clamped = constrain(amps, -(float)CURRENT_MAX, (float)CURRENT_MAX);
+        const float normalized = (clamped + (float)CURRENT_MAX) / (2.0f * (float)CURRENT_MAX);
+        return (uint8_t)constrain((int)lroundf(normalized * 255.0f), 0, 255);
+    }
+
+    static float decodeSignedCurrent(uint8_t encoded) {
+        const float normalized = (float)encoded / 255.0f;
+        const float amps = (normalized * 2.0f - 1.0f) * (float)CURRENT_MAX;
+        return constrain(amps, -(float)CURRENT_MAX, (float)CURRENT_MAX);
+    }
+
     /**
      * Calculate CRC16 (CCITT-FALSE polynomial)
      */
@@ -65,9 +78,9 @@ public:
      * Create and serialize a packet
      */
     static void createPacket(UARTPacket& packet, float phaseB, float phaseC) {
-        // Convert floats (0-100A) to uint8_t (0-255)
-        packet.phase_b = (uint8_t)constrain((phaseB * 255.0 / 100.0), 0, 255);
-        packet.phase_c = (uint8_t)constrain((phaseC * 255.0 / 100.0), 0, 255);
+        // Convert signed currents to uint8_t using bipolar mapping.
+        packet.phase_b = encodeSignedCurrent(phaseB);
+        packet.phase_c = encodeSignedCurrent(phaseC);
         
         // Calculate CRC over payload (phase_b, phase_c)
         uint8_t payload[2] = {packet.phase_b, packet.phase_c};
@@ -104,9 +117,9 @@ public:
         packet.crc_high = buffer[5];
         packet.end = buffer[6];
         
-        // Convert uint8_t (0-255) to floats (0-100A)
-        phaseB_out = (packet.phase_b * 100.0) / 255.0;
-        phaseC_out = (packet.phase_c * 100.0) / 255.0;
+        // Convert encoded bytes back to signed current values.
+        phaseB_out = decodeSignedCurrent(packet.phase_b);
+        phaseC_out = decodeSignedCurrent(packet.phase_c);
         
         return true;
     }

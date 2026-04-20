@@ -8,6 +8,7 @@ Kurze Projektzusammenfassung:
 
 - Simuliert 3-phasige CT-Signale fur Harvi/Zappi-ahnliche Eingange
 - MQTT-Eingang fur `PhaseA_Amp`, `PhaseB_Amp`, `PhaseC_Amp` und `SumPower_kW`
+- Stromwerte sind bipolar: `-CURRENT_MAX` bis `+CURRENT_MAX` (Standard: -100A..+100A)
 - Webserver auf dem Master mit WiFi- und MQTT-Konfiguration, Live-Graph und OTA
 - Optionales OLED-Display fur kompakte Laufzeitanzeige
 - Master-Slave-Betrieb uber UART fur Phase B und C
@@ -63,6 +64,7 @@ Short project summary:
 
 - Simulates 3-phase CT clamp signals for Harvi/Zappi-like inputs
 - MQTT input for `PhaseA_Amp`, `PhaseB_Amp`, `PhaseC_Amp`, and `SumPower_kW`
+- Current values are bipolar: `-CURRENT_MAX` to `+CURRENT_MAX` (default: -100A..+100A)
 - Master web server with WiFi and MQTT configuration, live graph, and OTA
 - Optional OLED display for compact runtime status
 - Master-slave operation over UART for Phase B and Phase C

@@ -115,17 +115,21 @@ Lower baud rates for longer cables:
 
 Master and Slave communicate via a simple binary protocol:
 
-### Packet Structure (8 bytes)
+### Packet Structure (7 bytes)
 
 ```
 Byte 0:   SYNC      0x55        (start marker)
 Byte 1:   LEN       0x02        (payload length)
-Byte 2:   PHASE_B   0x00-0xFF   (0-100A mapped to 0-255)
-Byte 3:   PHASE_C   0x00-0xFF   (0-100A mapped to 0-255)
+Byte 2:   PHASE_B   0x00-0xFF   (-CURRENT_MAX..+CURRENT_MAX mapped to 0-255)
+Byte 3:   PHASE_C   0x00-0xFF   (-CURRENT_MAX..+CURRENT_MAX mapped to 0-255)
 Byte 4:   CRC_LOW   ........     (CRC16 low byte)
 Byte 5:   CRC_HIGH  ........     (CRC16 high byte)
 Byte 6:   END       0xAA        (end marker)
-Byte 7:   PAD       0x00        (reserved)
+
+Byte value meaning (signed mapping):
+- `0` ≈ `-CURRENT_MAX`
+- `128` ≈ `0A`
+- `255` ≈ `+CURRENT_MAX`
 ```
 
 ### Example Data Flow

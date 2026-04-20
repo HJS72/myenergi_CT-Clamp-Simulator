@@ -26,11 +26,11 @@ This simulator:
 
 ### Q: What current range does it support?
 
-**A:** Default: 0-100A (configurable in `config.h` as `CURRENT_MAX`)
+**A:** Default: -100A to +100A (configurable in `config.h` as `CURRENT_MAX`)
 
 Changing the range:
 ```cpp
-#define CURRENT_MAX 200    // For 0-200A range
+#define CURRENT_MAX 200    // For -200A..+200A range
 ```
 
 ### Q: Can I use GPIO32 for phase C PWM instead of DAC?

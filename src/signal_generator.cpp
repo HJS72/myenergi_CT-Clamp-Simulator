@@ -21,15 +21,15 @@ void ACSignalGenerator::begin() {
 }
 
 void ACSignalGenerator::setCurrentPhaseA(float amps) {
-    currentsRMS[0] = constrain(amps, 0.0, (float)CURRENT_MAX);
+    currentsRMS[0] = constrain(amps, -(float)CURRENT_MAX, (float)CURRENT_MAX);
 }
 
 void ACSignalGenerator::setCurrentPhaseB(float amps) {
-    currentsRMS[1] = constrain(amps, 0.0, (float)CURRENT_MAX);
+    currentsRMS[1] = constrain(amps, -(float)CURRENT_MAX, (float)CURRENT_MAX);
 }
 
 void ACSignalGenerator::setCurrentPhaseC(float amps) {
-    currentsRMS[2] = constrain(amps, 0.0, (float)CURRENT_MAX);
+    currentsRMS[2] = constrain(amps, -(float)CURRENT_MAX, (float)CURRENT_MAX);
 }
 
 void ACSignalGenerator::update() {

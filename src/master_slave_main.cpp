@@ -45,10 +45,14 @@ using OledDisplay = Adafruit_SH1106G;
 #define OTA_TYPE_START 0x01
 #define OTA_TYPE_DATA 0x02
 #define OTA_TYPE_END 0x03
+#define OTA_TYPE_VERSION_REQ 0x10
+#define OTA_TYPE_VERSION_RESP 0x11
 #define OTA_TYPE_ACK 0x80
 #define OTA_TYPE_NACK 0x81
 #define OTA_MAX_PAYLOAD 220
 #define OTA_ACK_TIMEOUT_MS 1500
+#define SLAVE_VERSION_POLL_INTERVAL_MS 5000UL
+#define SLAVE_VERSION_QUERY_TIMEOUT_MS 80UL
 
 // ============= Global Objects =============
 WiFiClient espClient;
@@ -97,6 +101,9 @@ bool gSlaveOtaSelfTestLastResult = false;
 char gSlaveOtaSelfTestMessage[96] = "not-run";
 bool gSlaveOtaSelfTestSessionPassed = false;
 char gSlaveOtaLastMessage[96] = "idle";
+char gSlaveFirmwareVersion[20] = "unknown";
+unsigned long gSlaveVersionLastQueryMs = 0;
+unsigned long gSlaveVersionLastUpdateMs = 0;
 char gLastMqttTopic[160] = "";
 char gLastMqttPayload[160] = "";
 unsigned long gLastMqttMessageMs = 0;
@@ -184,6 +191,7 @@ static void updateSlaveOnlineSince();
 static uint16_t computeOtaFrameCrc(uint8_t type, uint8_t len, const uint8_t* payload);
 static size_t buildOtaFrame(uint8_t type, const uint8_t* payload, uint8_t payloadLen, uint8_t* out, size_t outSize);
 static bool readNextOtaFrame(uint8_t& typeOut, uint8_t* payloadOut, uint8_t& payloadLenOut, unsigned long timeoutMs);
+static bool requestSlaveVersion(unsigned long timeoutMs);
 static bool waitForSlaveOtaAck(uint8_t expectedType, unsigned long timeoutMs);
 static bool sendSlaveOtaStart(uint32_t imageSize);
 static bool sendSlaveOtaDataChunk(const uint8_t* chunk, uint16_t chunkLen);
@@ -984,6 +992,9 @@ static String buildDashboardHtml() {
     String mqttState = (gMQTT && gMQTT->isConnected()) ? "Connected" : "Disconnected";
     char projectVersion[20];
     getProjectVersion(projectVersion, sizeof(projectVersion));
+    String slaveVersionText = String(gSlaveFirmwareVersion);
+    bool slaveVersionLooksNumeric = (slaveVersionText.length() > 0 && slaveVersionText.charAt(0) >= '0' && slaveVersionText.charAt(0) <= '9');
+    String slaveVersionLabel = slaveVersionLooksNumeric ? ("v" + slaveVersionText) : slaveVersionText;
 
     String html;
     html.reserve(11000);
@@ -1053,7 +1064,15 @@ static String buildDashboardHtml() {
     // Header card — WiFi / MQTT / Slave status pills
     String wifiPillClass = (WiFi.status() == WL_CONNECTED && !gAccessPointMode) ? "status-pill status-ok" : "status-pill status-bad";
     String wifiPillText  = gAccessPointMode ? "AP mode" : (WiFi.status() == WL_CONNECTED ? "online" : "offline");
-    html += "<div class='card'><h1>CT Clamp Simulator <small style='font-size:.52em;color:#64748b;font-weight:600'>v" + String(projectVersion) + "</small></h1>";
+    html += "<div class='card'><h1>CT Clamp Simulator</h1>";
+    html += "<div style='color:#64748b;font-size:.95em;line-height:1.35;margin:-4px 0 10px 0'>";
+    html += "Master: v" + String(projectVersion) + "<br>";
+    html += "Slave: <span id='slave-fw-version'>" + jsonEscape(slaveVersionLabel) + "</span>";
+    if (gSlaveVersionLastUpdateMs > 0) {
+        unsigned long ageS = (millis() - gSlaveVersionLastUpdateMs) / 1000UL;
+        html += " <small>(" + formatDurationAdaptive(ageS) + " ago)</small>";
+    }
+    html += "</div>";
     html += "<div style='display:flex;gap:16px;flex-wrap:wrap;align-items:center'>";
     html += "<div>WiFi: <span class='" + wifiPillClass + "'>" + wifiPillText + "</span></div>";
     html += "<div>MQTT: <span id='mqtt-session-pill' class='" + mqttSessionClass + "'>" + mqttSessionText + "</span></div>";
@@ -1158,6 +1177,7 @@ static String buildDashboardHtml() {
     html += "const lastPayload=document.getElementById('mqtt-last-payload');if(lastPayload)lastPayload.textContent=d.last_payload||'-';";
     html += "const slPill=document.getElementById('slave-link-pill');if(slPill){slPill.textContent=d.slave_connected?'online':'offline';slPill.className=d.slave_connected?'status-pill status-ok':'status-pill status-bad';}";
     html += "const slSince=document.getElementById('slave-online-since');if(slSince){slSince.textContent=d.slave_connected?('Online since '+fmtDuration(d.slave_online_since_s||0)):'';}";
+    html += "const slVer=document.getElementById('slave-fw-version');if(slVer&&d.slave_fw_version){slVer.textContent=d.slave_fw_version;}";
     html += "const slUart=document.getElementById('slave-uart-rx');if(slUart)slUart.textContent='UART bytes='+(d.slave_rx_bytes||0)+' hb='+(d.slave_heartbeat_count||0)+' ack='+(d.slave_ack_count||0);";
     html += "const lastChangeEl=document.getElementById('last-change-time');if(lastChangeEl){lastChangeEl.textContent=d.last_message_age_s>0?('Last Change: '+fmtDuration(d.last_message_age_s)):(d.last_message_ms>0?'Last Change: 0s':'');}";
     html += "}catch(e){}}";
@@ -1310,7 +1330,12 @@ static String mqttStatusJson() {
     body += "\"last_message_age_s\":" + String(lastMessageAgeS) + ",";
     body += "\"server\":\"" + jsonEscape(String(gRuntimeConfig.mqttServer)) + "\",";
     body += "\"port\":" + String(gRuntimeConfig.mqttPort) + ",";
+    String slaveFw = String(gSlaveFirmwareVersion);
+    bool slaveFwLooksNumeric = (slaveFw.length() > 0 && slaveFw.charAt(0) >= '0' && slaveFw.charAt(0) <= '9');
+    String slaveFwLabel = slaveFwLooksNumeric ? ("v" + slaveFw) : slaveFw;
+
     body += "\"slave_connected\":" + String(slaveConnected ? "true" : "false") + ",";
+    body += "\"slave_fw_version\":\"" + jsonEscape(slaveFwLabel) + "\",";
     body += "\"slave_online_since_s\":" + String(slaveOnlineSinceS) + ",";
     body += "\"slave_rx_bytes\":" + String(slaveRxByteCount) + ",";
     body += "\"slave_heartbeat_count\":" + String(slaveHeartbeatCount) + ",";
@@ -1972,6 +1997,33 @@ static bool readNextOtaFrame(uint8_t& typeOut, uint8_t* payloadOut, uint8_t& pay
     return false;
 }
 
+static bool requestSlaveVersion(unsigned long timeoutMs) {
+    uint8_t frame[OTA_MAX_PAYLOAD + 6];
+    const size_t frameLen = buildOtaFrame(OTA_TYPE_VERSION_REQ, nullptr, 0, frame, sizeof(frame));
+    if (frameLen == 0) {
+        return false;
+    }
+
+    slaveSerial.write(frame, frameLen);
+
+    uint8_t responseType = 0;
+    uint8_t payloadLen = 0;
+    uint8_t payload[OTA_MAX_PAYLOAD];
+    if (!readNextOtaFrame(responseType, payload, payloadLen, timeoutMs)) {
+        return false;
+    }
+
+    if (responseType != OTA_TYPE_VERSION_RESP || payloadLen == 0) {
+        return false;
+    }
+
+    const size_t copyLen = min((size_t)payloadLen, sizeof(gSlaveFirmwareVersion) - 1);
+    memcpy(gSlaveFirmwareVersion, payload, copyLen);
+    gSlaveFirmwareVersion[copyLen] = '\0';
+    gSlaveVersionLastUpdateMs = millis();
+    return true;
+}
+
 static bool waitForSlaveOtaAck(uint8_t expectedType, unsigned long timeoutMs) {
     uint8_t responseType = 0;
     uint8_t payloadLen = 0;
@@ -2185,6 +2237,33 @@ static bool processIncomingOtaFrame(uint8_t type, const uint8_t* payload, uint8_
         return true;
     }
 
+    if (type == OTA_TYPE_VERSION_REQ) {
+        char version[20];
+        getProjectVersion(version, sizeof(version));
+
+        const size_t versionLen = strlen(version);
+        if (versionLen == 0 || versionLen > OTA_MAX_PAYLOAD) {
+            sendNack(type);
+            return true;
+        }
+
+        uint8_t frame[OTA_MAX_PAYLOAD + 6];
+        const size_t len = buildOtaFrame(
+            OTA_TYPE_VERSION_RESP,
+            (const uint8_t*)version,
+            (uint8_t)versionLen,
+            frame,
+            sizeof(frame)
+        );
+        if (len == 0) {
+            sendNack(type);
+            return true;
+        }
+
+        slaveSerial.write(frame, len);
+        return true;
+    }
+
     if (type == OTA_TYPE_DATA) {
         if (!gSlaveOtaReceiving || payloadLen < 2) {
             sendNack(type);
@@ -2316,6 +2395,12 @@ void setupSlave() {
         Serial.print(SLAVE_BAUD_RATE);
         Serial.println(" baud");
     }
+
+    gSlaveFirmwareVersion[0] = '\0';
+    strncpy(gSlaveFirmwareVersion, "unknown", sizeof(gSlaveFirmwareVersion) - 1);
+    gSlaveFirmwareVersion[sizeof(gSlaveFirmwareVersion) - 1] = '\0';
+    gSlaveVersionLastQueryMs = 0;
+    gSlaveVersionLastUpdateMs = 0;
     
     #elif DEVICE_MODE == DEVICE_MODE_SLAVE
     
@@ -2394,6 +2479,14 @@ static void runSlaveRoleLoop() {
 
 void communicateWithSlave() {
     unsigned long now = millis();
+
+    if (!gSlaveOtaInProgress && (gSlaveVersionLastQueryMs == 0 || (now - gSlaveVersionLastQueryMs) >= SLAVE_VERSION_POLL_INTERVAL_MS)) {
+        gSlaveVersionLastQueryMs = now;
+        if (!requestSlaveVersion(SLAVE_VERSION_QUERY_TIMEOUT_MS) && gSlaveVersionLastUpdateMs == 0) {
+            strncpy(gSlaveFirmwareVersion, "unavailable", sizeof(gSlaveFirmwareVersion) - 1);
+            gSlaveFirmwareVersion[sizeof(gSlaveFirmwareVersion) - 1] = '\0';
+        }
+    }
 
     // Read ACKs from slave and update link state
     while (slaveSerial.available() > 0) {
